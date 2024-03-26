@@ -1,0 +1,60 @@
+\documentclass[a4paper,12pt]{article} % Cambiado a tamaño de papel A4 y fuente de 12pt
+
+% Configuración de idioma
+\usepackage[spanish]{babel} % Idioma español
+
+% Configuración de página y márgenes
+\usepackage[top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+% Paquetes útiles
+\usepackage{amsmath, amssymb} % Paquetes para matemáticas
+\usepackage{graphicx} % Para incluir imágenes
+\usepackage{hyperref} % Para insertar enlaces
+\usepackage[table,xcdraw]{xcolor} % Para colores en tablas y texto
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{array} % Para formateo avanzado de tablas
+\usepackage{booktabs} % Para tablas de calidad de publicación
+\usepackage{longtable} % Para tablas que ocupan varias páginas
+\usepackage{tabularx} % Para tablas con ancho ajustable
+
+% Configuración de enlaces (https://www.overleaf.com/learn/latex/Hyperlinks)
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={TABD: MEMORIA DE PROYECTO. GERMÁN TOCÓN \& JESÚS GÓMEZ},
+    pdfpagemode=FullScreen,
+}
+\urlstyle{same}
+
+% Configuración de visualización de código
+\usepackage{minted}
+\usemintedstyle{emacs} % https://www.overleaf.com/learn/latex/Code_Highlighting_with_minted#Reference_guide
+
+% Estilos y comandos personalizados
+\setlength{\parindent}{0pt} % Elimina la indentación de párrafos
+
+% Símbolos para listas
+\renewcommand{\labelitemi}{$\bullet$}
+\renewcommand{\labelitemii}{$\circ$}
+\renewcommand{\labelitemiii}{$\centerdot$}
+
+% Comandos para citas y fotos centradas
+\newcommand{\quotes}[1]{``#1''}
+\newcommand{\fotocentrada}[2]{%
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[width=#2\linewidth]{#1}
+    \end{figure}
+}
+\newcommand{\fotocentradacomentada}[3]{%
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[width=#2\linewidth]{#1}
+        \caption{#3}
+    \end{figure}
+}
+
+
