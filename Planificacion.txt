@@ -1,0 +1,18 @@
+Planificación de las prácticas de Bases de Datos O/R:
+Semana 1 (Del 27 de Marzo al 2 de abril)
+- Diseño Conceptual: Diagrama de clase persistente
+Semana 2 (Del 3 al 9 de abril)
+- Recomendable hacer Mockups de la interfaz del usuario.
+- Diseño Lógico Objeto-Relacional
+o Diagrama del diseño lógico específico (UML)
+o Transformación de tablas
+Semana 3 (Del 10 al 16 de abril)
+- Diseño Físico
+- Capa Software: paquetes y disparadores.
+Semana 4 (Del 17 al 23 de abril)
+- Capa Software: paquetes y disparadores.
+Semana 5 (Del 24 al 2 de mayo)
+- Pequeña aplicación en el lenguaje que queráis para interactuar con la BD.
+- Memoria y preparación de presentación del trabajo
+Presentación (7 de mayo)
+- Presentación y Defensa de la práctica de Bases de Datos O/R

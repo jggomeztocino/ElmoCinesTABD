@@ -1,0 +1,24 @@
+A desarrollar:
+
+1. Documento-Memoria en formato PDF con el siguiente contenido:
+- Breve introducción al documento.
+- Descripción del contexto y de los requisitos funcionales y no funcionales.
+- Diagrama de clases persistentes.
+- Esquema lógico específico O/R. 
+- Diseño Físico.
+- Disparadores y paquete.
+- Conclusiones.
+- Referencias bibliográficas.
+
+2. Fichero comprimido con los ficheros de código fuente organizados de la siguiente manera:
+- Fichero .sql con el código de la creación de tipos.
+- Fichero .sql con el código de la creación de tablas.
+- Fichero .sql con el código de la creación de secuencias, en el caso de que se utilicen.
+- Fichero .sql con el código de la creación de disparadores.
+- Fichero .sql con el código de la creación de paquete que contiene procedimientos y funciones almacenados.
+- Fichero .sql con el código para la inserción de los datos en las tablas.
+- Fichero .sql con script que llame a los ficheros anteriores para la creación de todos los objetos y la carga inicial de datos.
+
+3. Fichero comprimido con la aplicación Java que da respuesta a los requisitos funcionales descritos en el apartado 2 de la memoria.
+
+4. Presentación - Demo de su trabajo.
