@@ -1,11 +1,12 @@
 -- Tipo para Película
 CREATE OR REPLACE TYPE TipoPelicula AS OBJECT (
-    idPelicula NUMBER,
-    Titulo VARCHAR2(207),
-    Directores VARCHAR2(100),
-    Actores VARCHAR2(100),
+    idPelicula VARCHAR2(20),
+    Titulo VARCHAR2(200),
+    Directores VARCHAR2(200),
+    Actores VARCHAR2(400),
     Duracion NUMBER(3),
     Sinopsis VARCHAR2(500),
+    UrlCover VARCHAR2(200),
     UrlTrailer VARCHAR2(200)
 );
 /
@@ -22,24 +23,22 @@ CREATE OR REPLACE TYPE TipoSesion AS OBJECT (
 -- Tipo para Butaca
 CREATE OR REPLACE TYPE TipoButaca AS OBJECT (
     idButaca NUMBER,
-    NumeroSala NUMBER(2),
-    Estado VARCHAR2(50)
+    NumeroSala NUMBER(2)
 );
 /
 
 -- Tipo para Cliente
 CREATE OR REPLACE TYPE TipoCliente AS OBJECT (
-    idCliente NUMBER,
+    Correo VARCHAR2(100),
     Nombre VARCHAR2(100),
-    Telefono VARCHAR2(15),
-    Correo VARCHAR2(100)
+    Telefono VARCHAR2(15)
 );
 /
 
 -- Tipo para Menú
 CREATE OR REPLACE TYPE TipoMenu AS OBJECT (
     idMenu NUMBER,
-    Descripcion VARCHAR2(100),
+    Descripcion VARCHAR2(200),
     Precio NUMBER(10, 2)
 );
 /
@@ -75,13 +74,4 @@ CREATE OR REPLACE TYPE TipoButacaReserva AS OBJECT (
     refReserva REF TipoReserva
 );
 /
-
---DROP TYPE TipoButaca FORCE;
---DROP TYPE TipoButacaReserva FORCE;
---DROP TYPE TipoCliente FORCE;
---DROP TYPE TipoEntrada FORCE;
---DROP TYPE TipoMenu FORCE;
---DROP TYPE TipoPelicula FORCE;
---DROP TYPE TipoReserva FORCE;
---DROP TYPE TipoSesion FORCE;
---DROP TYPE TablaEntradas FORCE;
+COMMIT;

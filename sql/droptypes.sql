@@ -1,0 +1,10 @@
+DROP TYPE TipoButaca FORCE;
+DROP TYPE TipoButacaReserva FORCE;
+DROP TYPE TipoCliente FORCE;
+DROP TYPE TipoEntrada FORCE;
+DROP TYPE TipoMenu FORCE;
+DROP TYPE TipoPelicula FORCE;
+DROP TYPE TipoReserva FORCE;
+DROP TYPE TipoSesion FORCE;
+DROP TYPE TablaEntradas FORCE;
+COMMIT;

@@ -25,7 +25,7 @@ ALTER TABLE Sesiones ADD (SCOPE FOR (idPelicula) IS Peliculas);
 
 -- Tabla para Butacas
 CREATE TABLE Butacas OF TipoButaca (
-                                       CONSTRAINT PK_Butacas PRIMARY KEY (idButaca)
+                                       CONSTRAINT PK_Butacas PRIMARY KEY (idButaca, NumeroSala)
 )
     PCTFREE 5  -- Menor reserva de espacio libre debido a la baja frecuencia de actualización.
     PCTUSED 90  -- Las butacas no cambian de estado con alta frecuencia, permitiendo un umbral más alto.
@@ -36,8 +36,7 @@ CREATE TABLE Butacas OF TipoButaca (
 
 -- Tabla para Clientes
 CREATE TABLE Clientes OF TipoCliente (
-                                         CONSTRAINT PK_Clientes PRIMARY KEY (idCliente),
-    CONSTRAINT AK_Clientes UNIQUE (Correo)
+                                         CONSTRAINT PK_Clientes PRIMARY KEY (Correo)
 )
 PCTFREE 15  -- Más espacio para actualizaciones ya que los datos de clientes pueden cambiar (p. ej., cambio de número de teléfono).
 PCTUSED 75
@@ -111,11 +110,4 @@ ALTER TABLE ButacasReservas ADD (SCOPE FOR (refReserva) IS Reservas);
 ALTER TABLE ButacasReservas MODIFY refButaca NOT NULL;
 ALTER TABLE ButacasReservas MODIFY refReserva NOT NULL;
 
---DROP TABLE Butacas CASCADE CONSTRAINTS;
---DROP TABLE Sesiones CASCADE CONSTRAINTS;
---DROP TABLE Peliculas CASCADE CONSTRAINTS;
---DROP TABLE Clientes CASCADE CONSTRAINTS;
---DROP TABLE Reservas CASCADE CONSTRAINTS;
---DROP TABLE Entradas CASCADE CONSTRAINTS;
---DROP TABLE Menus CASCADE CONSTRAINTS;
---DROP TABLE ButacasReservas CASCADE CONSTRAINTS;
+COMMIT;
