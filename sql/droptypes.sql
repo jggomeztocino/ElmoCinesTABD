@@ -6,5 +6,5 @@ DROP TYPE TipoMenu FORCE;
 DROP TYPE TipoPelicula FORCE;
 DROP TYPE TipoReserva FORCE;
 DROP TYPE TipoSesion FORCE;
-DROP TYPE TablaEntradas FORCE;
+DROP TYPE TipoEntradaArray FORCE;
 COMMIT;

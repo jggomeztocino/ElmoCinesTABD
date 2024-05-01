@@ -52,9 +52,7 @@ CREATE OR REPLACE TYPE TipoEntrada AS OBJECT (
 );
 /
 
--- Crear un tipo de tabla para las entradas
-CREATE OR REPLACE TYPE TablaEntradas AS TABLE OF TipoEntrada;
-/
+CREATE OR REPLACE TYPE TipoEntradaArray AS VARRAY(5) OF TipoEntrada;
 
 -- Tipo para Reserva
 CREATE OR REPLACE TYPE TipoReserva AS OBJECT (
@@ -63,7 +61,7 @@ CREATE OR REPLACE TYPE TipoReserva AS OBJECT (
     idCliente REF TipoCliente,
     FormaPago VARCHAR2(50),
     FechaCompra TIMESTAMP,
-    Entradas TablaEntradas  -- Campo de NESTED TABLE para la composición de entradas
+    Entradas TipoEntradaArray
 );
 /
 

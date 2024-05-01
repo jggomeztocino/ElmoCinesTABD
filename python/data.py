@@ -23,15 +23,16 @@ def generar_cliente(sql):
     sql.append(f"COMMIT;")
     return cliente, sql
 
-def generar_entrada(sql):
+def generar_entrada():
     idEntrada = f"secuencia_idEntrada.NEXTVAL"
     idMenu = random.choice([1,2,3,4,5])
     idMenu = f"(SELECT REF(m) FROM Menus m WHERE m.idMenu = {idMenu})"
     Descripcion = random.choice(["Entrada adulta", "Entrada infantil"])
     Precio = 6 if Descripcion == "Entrada adulta" else 4
-    sql.append(f"INSERT INTO Entradas (idEntrada, idMenu, Descripcion, Precio) VALUES ({idEntrada}, {idMenu}, '{Descripcion}', {Precio});")
-    sql.append(f"COMMIT;")
-    return sql
+    entrada = {"idEntrada": idEntrada, "idMenu": idMenu, "Descripcion": Descripcion, "Precio": Precio}
+    #sql.append(f"INSERT INTO Entradas (idEntrada, idMenu, Descripcion, Precio) VALUES ({idEntrada}, {idMenu}, '{Descripcion}', {Precio});")
+    #sql.append(f"COMMIT;")
+    return entrada
 
 def generar_reservaButaca(sql, idButaca, NumeroSala):
     idButacaReserva = f"secuencia_idButacaReserva.NEXTVAL"
@@ -54,10 +55,11 @@ def generar_reserva(sql, butaca, NumeroSala):
     idCliente = f"(SELECT REF(c) FROM Clientes c WHERE c.Correo = '{idCliente}')"
     FormaPago = random.choice(["Efectivo", "Tarjeta"])
     FechaCompra = f"TO_TIMESTAMP('{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}', 'YYYY-MM-DD HH24:MI:SS')"
-    sql.append(f"INSERT INTO Reservas (idReserva, idSesion, idCliente, FormaPago, FechaCompra) VALUES ({idReserva}, {idSesion}, {idCliente}, '{FormaPago}', {FechaCompra});")
+    entrada = generar_entrada()
+    sql.append(f"INSERT INTO Reservas (idReserva, idSesion, idCliente, FormaPago, FechaCompra, Entradas) VALUES ({idReserva}, {idSesion}, {idCliente}, '{FormaPago}', {FechaCompra}, TipoEntradaArray(TipoEntrada({entrada["idEntrada"]}, {entrada["idMenu"]}, '{entrada["Descripcion"]}', {entrada["Precio"]})));")
     sql.append(f"COMMIT; END; /")
     sql = generar_reservaButaca(sql, butaca, NumeroSala)
-    sql = generar_entrada(sql)
+    #sql = generar_entrada(sql)
     return sql
 
 def generar_sesiones(sesiones_dia, hora_inicio, fecha_inicio, fecha_fin, salas, nButacas, peliculas):

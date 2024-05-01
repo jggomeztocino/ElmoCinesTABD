@@ -48,7 +48,7 @@ NOCACHE;
 -- Tabla para Reservas
 CREATE TABLE Reservas OF TipoReserva (
                                          CONSTRAINT PK_Reservas PRIMARY KEY (idReserva)
-) NESTED TABLE Entradas STORE AS Tabla_Entradas
+)
     PCTFREE 20  -- Alto porcentaje de espacio libre para permitir modificaciones en las reservas.
     PCTUSED 60  -- Bajo umbral de uso para garantizar un rendimiento eficiente en la inserción.
     INITRANS 5  -- Alto número de transacciones iniciales para manejar picos de reservas.
@@ -72,26 +72,18 @@ CREATE TABLE Menus OF TipoMenu (
     NOCACHE;  -- Los cambios son infrecuentes y no se benefician significativamente de la caché.
 /
 
-ALTER TABLE Tabla_Entradas ADD (SCOPE FOR (idMenu) IS Menus);
-ALTER TABLE Tabla_Entradas
-    PCTFREE 10
-    PCTUSED 70
-    INITRANS 10  -- Incrementado para gestionar altos volúmenes de transacciones durante períodos de ventas intensas.
-    MAXTRANS 255
-    NOCACHE;
-
 -- Tabla para Entradas
-CREATE TABLE Entradas OF TipoEntrada (
-                                         CONSTRAINT PK_Entradas PRIMARY KEY (idEntrada)
-)
-    PCTFREE 10
-    PCTUSED 85  -- Se espera que las entradas se llenen y cambien de estado a un ritmo moderado, especialmente en días de estreno.
-    INITRANS 4  -- Esperamos algunas transacciones concurrentes, especialmente durante la venta de entradas de alto perfil.
-    MAXTRANS 255
-    NOCACHE;  -- No es crítico cachear, dado que la creación de IDs no necesita un alto rendimiento.
-/
+--CREATE TABLE Entradas OF TipoEntrada (
+--                                         CONSTRAINT PK_Entradas PRIMARY KEY (idEntrada)
+--)
+--    PCTFREE 10
+--    PCTUSED 85  -- Se espera que las entradas se llenen y cambien de estado a un ritmo moderado, especialmente en días de estreno.
+--    INITRANS 4  -- Esperamos algunas transacciones concurrentes, especialmente durante la venta de entradas de alto perfil.
+--    MAXTRANS 255
+--    NOCACHE;  -- No es crítico cachear, dado que la creación de IDs no necesita un alto rendimiento.
+--/
 
-ALTER TABLE Entradas ADD (SCOPE FOR (idMenu) IS Menus);
+--ALTER TABLE Entradas ADD (SCOPE FOR (idMenu) IS Menus);
 
 -- Tabla para gestionar las relaciones N:M entre Butacas y Reservas
 CREATE TABLE ButacasReservas OF TipoButacaReserva (
