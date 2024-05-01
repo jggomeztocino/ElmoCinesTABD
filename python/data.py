@@ -36,10 +36,10 @@ def generar_entrada(sql):
 def generar_reservaButaca(sql, idButaca, NumeroSala):
     idButacaReserva = f"secuencia_idButacaReserva.NEXTVAL"
     butaca = f"(SELECT REF(b) FROM Butacas b WHERE b.idButaca = {idButaca} AND b.NumeroSala = {NumeroSala})"
-    sql.append(f"VARIABLE reserva NUMBER; BEGIN SELECT SECUENCIA_IDRESERVA.CURRVAL INTO reserva FROM DUAL; END; /")
-    idReserva = f"(SELECT REF(r) FROM Reservas r WHERE idReserva = :reserva;)"
+    sql.append(f"DECLARE reserva NUMBER; BEGIN SELECT SECUENCIA_IDRESERVA.CURRVAL INTO reserva FROM DUAL;")
+    idReserva = f"(SELECT REF(r) FROM Reservas r WHERE idReserva = reserva)"
     sql.append(f"INSERT INTO ButacasReservas (idButacaReserva, refButaca, refReserva) VALUES ({idButacaReserva}, {butaca}, {idReserva});")
-    sql.append(f"COMMIT;")
+    sql.append(f"COMMIT; END; /")
     return sql
 
 def generar_reserva(sql, butaca, NumeroSala):
@@ -47,15 +47,15 @@ def generar_reserva(sql, butaca, NumeroSala):
         Genera una reserva, junto a su cliente y entrada
     """
     cliente, sql = generar_cliente(sql)
+    sql.append(f"DECLARE sesion NUMBER; BEGIN SELECT SECUENCIA_IDSESION.CURRVAL INTO sesion FROM DUAL;")
     idReserva = f"secuencia_idReserva.NEXTVAL" 
-    sql.append(f"VARIABLE sesion NUMBER; BEGIN SELECT SECUENCIA_IDSESION.CURRVAL INTO sesion FROM DUAL; END; /")
-    idSesion = f"(SELECT REF(s) FROM Sesiones s WHERE idSesion = :sesion;)" 
+    idSesion = f"(SELECT REF(s) FROM Sesiones s WHERE idSesion = sesion)" 
     idCliente = cliente["Email"]
-    idCliente = f"(SELECT REF(c) FROM Clientes c WHERE c.idCliente = {idCliente})"
+    idCliente = f"(SELECT REF(c) FROM Clientes c WHERE c.Correo = '{idCliente}')"
     FormaPago = random.choice(["Efectivo", "Tarjeta"])
     FechaCompra = f"TO_TIMESTAMP('{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}', 'YYYY-MM-DD HH24:MI:SS')"
-    sql.append(f"INSERT INTO Reservas (idReserva, idSesion, idCliente, FormaPago, FechaCompra) VALUES (secuencia_idReserva.NEXTVAL, {idSesion}, {idCliente}, '{FormaPago}', {FechaCompra});")
-    sql.append(f"COMMIT;")
+    sql.append(f"INSERT INTO Reservas (idReserva, idSesion, idCliente, FormaPago, FechaCompra) VALUES ({idReserva}, {idSesion}, {idCliente}, '{FormaPago}', {FechaCompra});")
+    sql.append(f"COMMIT; END; /")
     sql = generar_reservaButaca(sql, butaca, NumeroSala)
     sql = generar_entrada(sql)
     return sql
@@ -71,20 +71,22 @@ def generar_sesiones(sesiones_dia, hora_inicio, fecha_inicio, fecha_fin, salas, 
 
     for pelicula in peliculas:
         fecha_actual = fecha_inicio
-        hora_actual = hora_inicio
         while(fecha_actual < fecha_fin):
             if random.random() <= 0.5:
-                for _ in range(sesiones_dia + 1):
+                hora_actual = hora_inicio
+                for _ in range(1, sesiones_dia + 1):
                     idSesion = f"secuencia_idSesion.NEXTVAL"
                     idPelicula = f"(SELECT REF(p) FROM Peliculas p WHERE p.idPelicula = '{pelicula}')"
-                    NumeroSala = random.randint(1, salas+1)
+                    NumeroSala = random.randint(1, salas)
                     FechaHora = f"TO_TIMESTAMP('{fecha_actual.strftime('%Y-%m-%d')} {hora_actual}:{minutos[random.randint(0, 3)]}:00', 'YYYY-MM-DD HH24:MI:SS')"
                     sql.append(f"INSERT INTO Sesiones (idSesion, idPelicula, NumeroSala, FechaHora) VALUES ({idSesion}, {idPelicula}, {NumeroSala}, {FechaHora});")
                     sql.append(f"COMMIT;")
-                    for butaca in range(nButacas + 1):
+                    for butaca in range(1, nButacas + 1):
                         if random.random() <= probabilidad_ocupado:
                             sql = generar_reserva(sql, butaca, NumeroSala)
                     hora_actual += 3
+                    if hora_actual >= 24:
+                        hora_actual = 0
             fecha_actual += timedelta(days=1)
         
     return sql
