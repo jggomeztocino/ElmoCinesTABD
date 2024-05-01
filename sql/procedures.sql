@@ -110,13 +110,20 @@ END;
 CREATE OR REPLACE PROCEDURE EliminarReserva(
     p_id_reserva IN Reservas.idReserva%TYPE
 ) AS
+    ListaEntradasNueva TipoEntradaArray;
 BEGIN
-    -- Eliminar las entradas asociadas a la reserva
-    DELETE FROM TABLE (
-        SELECT Entradas
-        FROM Reservas
-        WHERE idReserva = p_id_reserva
-    );
+    -- Obtener y vaciar la lista de entradas de la reserva
+    SELECT Entradas INTO ListaEntradasNueva
+    FROM Reservas
+    WHERE idReserva = p_id_reserva;
+
+    -- Se asume que el VARRAY debe vaciarse completamente para su eliminación
+    ListaEntradasNueva.DELETE;
+
+    -- Actualizar la reserva con el VARRAY vacío
+    UPDATE Reservas
+    SET Entradas = ListaEntradasNueva
+    WHERE idReserva = p_id_reserva;
 
     -- Eliminar las asociaciones entre butacas y la reserva
     DELETE FROM ButacasReservas

@@ -72,19 +72,6 @@ CREATE TABLE Menus OF TipoMenu (
     NOCACHE;  -- Los cambios son infrecuentes y no se benefician significativamente de la caché.
 /
 
--- Tabla para Entradas
---CREATE TABLE Entradas OF TipoEntrada (
---                                         CONSTRAINT PK_Entradas PRIMARY KEY (idEntrada)
---)
---    PCTFREE 10
---    PCTUSED 85  -- Se espera que las entradas se llenen y cambien de estado a un ritmo moderado, especialmente en días de estreno.
---    INITRANS 4  -- Esperamos algunas transacciones concurrentes, especialmente durante la venta de entradas de alto perfil.
---    MAXTRANS 255
---    NOCACHE;  -- No es crítico cachear, dado que la creación de IDs no necesita un alto rendimiento.
---/
-
---ALTER TABLE Entradas ADD (SCOPE FOR (idMenu) IS Menus);
-
 -- Tabla para gestionar las relaciones N:M entre Butacas y Reservas
 CREATE TABLE ButacasReservas OF TipoButacaReserva (
                                                       CONSTRAINT PK_ButacasReservas PRIMARY KEY (idButacaReserva)
