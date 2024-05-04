@@ -7,4 +7,5 @@ DROP TYPE TipoPelicula FORCE;
 DROP TYPE TipoReserva FORCE;
 DROP TYPE TipoSesion FORCE;
 DROP TYPE TipoEntradaArray FORCE;
+DROP TYPE ButacasSeleccionadas FORCE;
 COMMIT;

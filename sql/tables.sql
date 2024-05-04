@@ -11,7 +11,8 @@ CREATE TABLE Peliculas OF TipoPelicula (
 
 -- Tabla para Sesiones
 CREATE TABLE Sesiones OF TipoSesion (
-                                        CONSTRAINT PK_Sesiones PRIMARY KEY (idSesion)
+                                        CONSTRAINT PK_Sesiones PRIMARY KEY (idSesion),
+                                        CONSTRAINT FK_Peliculas FOREIGN KEY (idPelicula) REFERENCES Peliculas(idPelicula)
 )
     PCTFREE 10
     PCTUSED 80  -- Aumenta el umbral de uso debido a que las sesiones pueden cambiar frecuentemente, especialmente las horas.
@@ -21,7 +22,7 @@ CREATE TABLE Sesiones OF TipoSesion (
 /
 
 ALTER TABLE Sesiones MODIFY idPelicula NOT NULL;
-ALTER TABLE Sesiones ADD (SCOPE FOR (idPelicula) IS Peliculas);
+--ALTER TABLE Sesiones ADD (SCOPE FOR (idPelicula) IS Peliculas);
 
 -- Tabla para Butacas
 CREATE TABLE Butacas OF TipoButaca (
@@ -47,7 +48,9 @@ NOCACHE;
 
 -- Tabla para Reservas
 CREATE TABLE Reservas OF TipoReserva (
-                                         CONSTRAINT PK_Reservas PRIMARY KEY (idReserva)
+                                         CONSTRAINT PK_Reservas PRIMARY KEY (idReserva),
+                                         CONSTRAINT FK_RESERVA_SESION FOREIGN KEY(idSesion) REFERENCES Sesiones(idSesion),
+                                         CONSTRAINT FK_RESERVA_CLIENTE FOREIGN KEY(Cliente) REFERENCES Clientes(Correo)
 )
     PCTFREE 20  -- Alto porcentaje de espacio libre para permitir modificaciones en las reservas.
     PCTUSED 60  -- Bajo umbral de uso para garantizar un rendimiento eficiente en la inserción.
@@ -57,9 +60,11 @@ CREATE TABLE Reservas OF TipoReserva (
 /
 
 ALTER TABLE Reservas MODIFY idSesion NOT NULL;
-ALTER TABLE Reservas MODIFY idCliente NOT NULL;
-ALTER TABLE Reservas ADD (SCOPE FOR (idSesion) IS Sesiones);
-ALTER TABLE Reservas ADD (SCOPE FOR (idCliente) IS Clientes);
+ALTER TABLE Reservas MODIFY Cliente NOT NULL;
+--ALTER TABLE Reservas ADD (SCOPE FOR (idSesion) IS Sesiones);
+--ALTER TABLE Reservas ADD (SCOPE FOR (idCliente) IS Clientes);
+
+-- No se puede establacer FK en Entradsa a Menus, por lo que se implementa un Trigger para asegurar la integridad referencial.
 
 -- Tabla para Menús
 CREATE TABLE Menus OF TipoMenu (
@@ -74,7 +79,9 @@ CREATE TABLE Menus OF TipoMenu (
 
 -- Tabla para gestionar las relaciones N:M entre Butacas y Reservas
 CREATE TABLE ButacasReservas OF TipoButacaReserva (
-                                                      CONSTRAINT PK_ButacasReservas PRIMARY KEY (idButacaReserva)
+                                                      CONSTRAINT PK_ButacasReservas PRIMARY KEY (idButacaReserva),
+                                                      CONSTRAINT FK_BUTACAS FOREIGN KEY (idButaca, NumeroSala) REFERENCES Butacas(idButaca, NumeroSala),
+                                                      CONSTRAINT FK_RESERVA FOREIGN KEY (idReserva) REFERENCES Reservas(idReserva)
 )
     PCTFREE 20  -- Se necesita más espacio libre para ajustes, dado que las asignaciones de butacas a reservas pueden cambiar con cancelaciones y reasignaciones.
     PCTUSED 50  -- Un umbral bajo para asegurar que los bloques se mantengan disponibles para nuevas asignaciones rápidamente.
@@ -83,10 +90,12 @@ CREATE TABLE ButacasReservas OF TipoButacaReserva (
     NOCACHE;  -- La asignación de butacas puede beneficiarse de una rápida accesibilidad sin necesidad de caché.
 /
 
-ALTER TABLE ButacasReservas ADD (SCOPE FOR (refButaca) IS Butacas);
-ALTER TABLE ButacasReservas ADD (SCOPE FOR (refReserva) IS Reservas);
-
-ALTER TABLE ButacasReservas MODIFY refButaca NOT NULL;
-ALTER TABLE ButacasReservas MODIFY refReserva NOT NULL;
+--ALTER TABLE ButacasReservas ADD (SCOPE FOR (refButaca) IS Butacas);
+--ALTER TABLE ButacasReservas ADD (SCOPE FOR (refReserva) IS Reservas);
+-- ALTER TABLE ButacasReservas MODIFY refButaca NOT NULL;
+--ALTER TABLE ButacasReservas MODIFY refReserva NOT NULL;
+ALTER TABLE ButacasReservas MODIFY idButaca NOT NULL;
+ALTER TABLE ButacasReservas MODIFY idReserva NOT NULL;
+ALTER TABLE ButacasReservas MODIFY NumeroSala NOT NULL;
 
 COMMIT;

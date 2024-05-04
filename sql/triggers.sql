@@ -1,84 +1,94 @@
---Disparador que comprueba si, al realizar una reserva, el cliente existe o no.
-CREATE OR REPLACE TRIGGER Trg_VerificarCliente
-BEFORE INSERT ON Reservas
-FOR EACH ROW
+-- Trigger para garantizar la integridad referencial entre Entradas y Men√∫s
+CREATE OR REPLACE TRIGGER verificar_menu_entrada
+    BEFORE INSERT OR UPDATE OF Entradas ON Reservas
+    FOR EACH ROW
 DECLARE
-    v_count NUMBER;
+    existencia_menu NUMBER;
 BEGIN
-    -- Acceder al objeto referenciado
-    SELECT COUNT(*) INTO v_count FROM Clientes WHERE Correo = DEREF(:NEW.idCliente).Correo;
+    -- Verificar si el idMenu en cada entrada de la reserva existe en la tabla Menus
+    FOR i IN 1..:NEW.Entradas.COUNT LOOP
+            SELECT COUNT(*)
+            INTO existencia_menu
+            FROM Menus
+            WHERE idMenu = :NEW.Entradas(i).idMenu;
 
-    -- Si el cliente no existe, se registrar· en la base de datos.
-    IF v_count = 0 THEN
-        -- Insertar el nuevo cliente
-        INSERT INTO Clientes (Correo, Nombre, Telefono)
-        VALUES (DEREF(:NEW.idCliente).Correo, DEREF(:NEW.idCliente).Nombre, DEREF(:NEW.idCliente).Telefono);
-    -- En caso contrario, se actualizar·n su nombre y n˙mero de telÈfono.
-    ELSE
-        -- Actualizar el cliente existente
-        UPDATE Clientes
-        SET Nombre = DEREF(:NEW.idCliente).Nombre, Telefono = DEREF(:NEW.idCliente).Telefono
-        WHERE Correo = DEREF(:NEW.idCliente).Correo;
-    END IF;
+            IF existencia_menu = 0 THEN
+                -- Si no existe, levanta un error
+                RAISE_APPLICATION_ERROR(-20001, 'El men√∫ con ID ' || TO_CHAR(:NEW.Entradas(i).idMenu) || ' no existe.');
+            END IF;
+        END LOOP;
 END;
 /
 
---Disparador que elimina las butacas y reservas de un cliente, al darse de baja en la aplicaci√≥n.
-CREATE OR REPLACE TRIGGER Trg_EliminarCliente
-BEFORE DELETE ON Clientes
-FOR EACH ROW
-BEGIN
-    -- Eliminar las relaciones de ButacasReservas asociadas al cliente que est· siendo eliminado
-    DELETE FROM ButacasReservas WHERE refReserva IN (SELECT REF(r) FROM Reservas r WHERE DEREF(r.idCliente).Correo = :OLD.Correo);
-    
-    -- Eliminar las reservas asociadas al cliente que est· siendo eliminado
-    DELETE FROM Reservas WHERE idCliente = (SELECT REF(c) FROM Clientes c WHERE c.Correo = :OLD.Correo);
-END;
-/
-
-CREATE OR REPLACE FUNCTION get_ref_butaca(p_ref_butaca REF TipoButaca)
-  RETURN TipoButaca
-AS
-  v_butaca TipoButaca;
-BEGIN
-  SELECT DEREF(p_ref_butaca) INTO v_butaca FROM DUAL;
-  RETURN v_butaca;
-END;
-/
-
---Disparador que comprueba si las butacas seleccionadas por el usuario siguen libres al realizar la reserva.
-CREATE OR REPLACE TRIGGER Trg_VerificarButacas
-BEFORE INSERT ON Reservas
-FOR EACH ROW
+-- Disparador para verificar y actualizar o insertar cliente antes de reservar
+CREATE OR REPLACE TRIGGER existe_cliente
+    BEFORE INSERT OR UPDATE ON Clientes
+    FOR EACH ROW
 DECLARE
-    v_count NUMBER;
+    cliente_existente NUMBER;
 BEGIN
+    -- Verificar si el cliente ya existe
     SELECT COUNT(*)
-    INTO v_count
-    FROM ButacasReservas br
-    WHERE br.refReserva IS NOT NULL
-    AND EXISTS (
-        SELECT 1
-        FROM TABLE(:NEW.Entradas) e
-        WHERE br.refButaca = e.idButaca
-    );
+    INTO cliente_existente
+    FROM Clientes
+    WHERE Correo = :NEW.Correo;
 
-    IF v_count > 0 THEN
-        RAISE_APPLICATION_ERROR(-20001, 'Una o m·s butacas ya est·n reservadas.');
+    IF cliente_existente = 0 THEN
+        -- Si el cliente no existe, insertar un nuevo cliente
+        INSERT INTO Clientes (Correo, Nombre, Telefono)
+        VALUES (:NEW.Correo, :NEW.Nombre, :NEW.Telefono);
+    ELSE
+        -- Si el cliente existe, actualizar su informaci√≥n
+        UPDATE Clientes
+        SET Nombre = :NEW.Nombre, Telefono = :NEW.Telefono
+        WHERE Correo = :NEW.Correo;
     END IF;
 END;
 /
 
---Disparador que elimina las butacas y entradas de una reserva, al ser esta eliminada.
-CREATE OR REPLACE TRIGGER Trg_EliminarReserva
-BEFORE DELETE ON Reservas
-FOR EACH ROW
+-- Disparador para verificar la disponibilidad de butacas antes de registrar una reserva
+CREATE OR REPLACE TRIGGER disponibilidad_butacas
+    BEFORE INSERT ON Reservas
+    FOR EACH ROW
+DECLARE
+    butaca_ocupada EXCEPTION;
 BEGIN
-    -- Eliminar las relaciones de ButacasReservas asociadas a la reserva
-    FOR b IN (SELECT refButaca FROM ButacasReservas WHERE refReserva = :OLD.idReserva) LOOP
-        DELETE FROM ButacasReservas WHERE refButaca = b.refButaca AND refReserva = :OLD.idReserva;
-    END LOOP;
+    -- Verificar la disponibilidad de las butacas
+    FOR i IN 1..:NEW.Entradas.COUNT LOOP
+            IF calcular_butacas_libres(:NEW.idSesion) = 0 THEN
+                RAISE butaca_ocupada;
+            END IF;
+        END LOOP;
+EXCEPTION
+    WHEN butaca_ocupada THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Butaca no disponible.');
+END;
+/
 
-    
+-- Disparador para eliminar todas las entradas asociadas y liberar butacas antes de eliminar una reserva
+CREATE OR REPLACE TRIGGER borrar_entradasybutacas_reserva
+    BEFORE DELETE ON Reservas
+    FOR EACH ROW
+BEGIN
+    -- Liberar las butacas reservadas
+    DELETE FROM ButacasReservas
+    WHERE idReserva = :OLD.idReserva;
+END;
+/
+
+-- Disparador para eliminar todas las reservas de un cliente y liberar butacas antes de eliminar el cliente
+CREATE OR REPLACE TRIGGER borrar_reservas_cliente
+    BEFORE DELETE ON Clientes
+    FOR EACH ROW
+BEGIN
+    -- Eliminar todas las reservas asociadas al cliente
+    FOR rec IN (SELECT idReserva FROM Reservas WHERE Cliente = :OLD.Correo)
+        LOOP
+            DELETE FROM ButacasReservas
+            WHERE idReserva = rec.idReserva;
+
+            DELETE FROM Reservas
+            WHERE idReserva = rec.idReserva;
+        END LOOP;
 END;
 /

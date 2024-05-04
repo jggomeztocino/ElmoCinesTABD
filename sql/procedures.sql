@@ -1,228 +1,154 @@
--- Creación de procedimiento para listar la cartelera actual
-CREATE OR REPLACE PROCEDURE ListarCartelera(p_cursor OUT SYS_REFCURSOR)
-IS
+-- Procedimiento para listar el Título y el UrlCover de todas las películas
+CREATE OR REPLACE PROCEDURE listar_peliculas AS
+    CURSOR c_peliculas IS
+        SELECT Titulo, UrlCover FROM Peliculas;
 BEGIN
-    -- Abre un cursor que selecciona título y URL de la imagen de la portada de las películas
-    OPEN p_cursor FOR
-        SELECT Titulo, UrlCover
-        FROM Peliculas;
+    FOR rec IN c_peliculas LOOP
+            DBMS_OUTPUT.PUT_LINE('Título: ' || rec.Titulo || ' - URL Cover: ' || rec.UrlCover);
+        END LOOP;
 END;
 /
 
--- Creación de procedimiento para listar información detallada de una película específica
-CREATE OR REPLACE PROCEDURE ListarPelicula(p_idPelicula IN Peliculas.idPelicula%TYPE, p_cursor OUT SYS_REFCURSOR)
-IS
+-- Procedimiento para listar toda la información de una película, dado su ID
+CREATE OR REPLACE PROCEDURE mostrar_info_pelicula(p_idPelicula IN VARCHAR2) AS
+    CURSOR c_pelicula IS
+        SELECT * FROM Peliculas WHERE idPelicula = p_idPelicula;
 BEGIN
-    -- Abre un cursor que selecciona detalles de la película basados en el ID proporcionado
-    OPEN p_cursor FOR
-        SELECT Titulo, Directores, Actores, Duracion, Sinopsis, UrlTrailer, UrlCover
-        FROM Peliculas
-        WHERE idPelicula = p_idPelicula;
+    FOR rec IN c_pelicula LOOP
+            DBMS_OUTPUT.PUT_LINE('ID: ' || rec.idPelicula || ' Título: ' || rec.Titulo ||
+                                 ' Directores: ' || rec.Directores || ' Actores: ' || rec.Actores ||
+                                 ' Duración: ' || rec.Duracion || ' Sinopsis: ' || rec.Sinopsis ||
+                                 ' URL Cover: ' || rec.UrlCover || ' URL Trailer: ' || rec.UrlTrailer);
+        END LOOP;
 END;
 /
 
--- Creación de procedimiento para listar sesiones disponibles de una película
-CREATE OR REPLACE PROCEDURE ListarSesionesPelicula(p_idPelicula IN Peliculas.idPelicula%TYPE, p_cursor OUT SYS_REFCURSOR)
-IS
+-- Procedimiento para listar el idSesion y la FechaHora de las Sesiones programadas para una Película que tenga al menos una butaca libre
+CREATE OR REPLACE PROCEDURE sesiones_con_butacas_libres(p_idPelicula IN VARCHAR2) AS
+    CURSOR c_sesiones IS
+        SELECT idSesion, FechaHora FROM Sesiones WHERE idPelicula = p_idPelicula;
 BEGIN
-    -- Abre un cursor que selecciona fechas y horas de las sesiones de una película
-    OPEN p_cursor FOR
-        SELECT s.FechaHora
-        FROM Sesiones s
-        WHERE s.idPelicula = p_idPelicula
-        AND (SELECT COUNT(*)
-            FROM Butacas b
-            LEFT JOIN ButacasReservas br ON b.idButaca = br.refButaca.idButaca
-            WHERE br.refSesion.idSesion = s.idSesion
-        ) < 30; -- Asegura que haya menos de 30 butacas reservadas para la sesión
+    FOR rec IN c_sesiones LOOP
+            IF calcular_butacas_libres(rec.idSesion) > 0 THEN
+                DBMS_OUTPUT.PUT_LINE('ID Sesión: ' || rec.idSesion || ' - Fecha y Hora: ' || rec.FechaHora);
+            END IF;
+        END LOOP;
 END;
 /
 
--- Creación de procedimiento para listar butacas ocupadas en una sesión
-CREATE OR REPLACE PROCEDURE ListarButacasOcupadas(p_idSesion IN Sesiones.idSesion%TYPE, p_cursor OUT SYS_REFCURSOR)
-IS
+-- Procedimiento para listar las butacas ocupadas para un idSesion dado
+CREATE OR REPLACE PROCEDURE butacas_ocupadas(p_idSesion IN NUMBER) AS
+    CURSOR c_butacas IS
+        SELECT idButaca, NumeroSala FROM ButacasReservas WHERE idReserva IN (SELECT idReserva FROM Reservas WHERE idSesion = p_idSesion);
 BEGIN
-    -- Abre un cursor que selecciona las butacas ocupadas para una sesión
-    OPEN p_cursor FOR
-        SELECT br.refButaca.idButaca
-        FROM ButacasReservas br
-        JOIN Reservas r ON br.refReserva = r.idReserva
-        WHERE r.idSesion = p_idSesion;
+    FOR rec IN c_butacas LOOP
+            DBMS_OUTPUT.PUT_LINE('ID Butaca: ' || rec.idButaca || ' - Número de Sala: ' || rec.NumeroSala);
+        END LOOP;
 END;
 /
 
--- Creación de procedimiento para realizar una reserva
-CREATE OR REPLACE PROCEDURE RealizarReserva(
-    pCorreo IN Clientes.Correo%TYPE,
-    pNombre IN Clientes.Nombre%TYPE,
-    pTelefono IN Clientes.Telefono%TYPE,
-    pIdSesion IN Sesiones.idSesion%TYPE,
-    pFormaPago IN Reservas.FormaPago%TYPE,
-    pFechaCompra TIMESTAMP,
-    pButacas SYS.ODCIVARCHAR2LIST, -- Lista de pares idButaca-NumeroSala
-    pEntradas TipoEntradaArray -- Array de entradas con descripción y precio
+CREATE OR REPLACE PROCEDURE realizar_reserva (
+    sesion IN NUMBER,
+    sala IN NUMBER,
+    email IN VARCHAR2,
+    nom IN VARCHAR2,
+    tfn IN VARCHAR2,
+    v_entradas IN TipoEntradaArray,
+    v_butacas IN ButacasSeleccionadas
 ) AS
-    vCliente REF TipoCliente;
-    vReserva REF TipoReserva;
-    vSesion REF TipoSesion;
-    vButaca REF TipoButaca;
-    vIdReserva Reservas.idReserva%TYPE;
+    pago VARCHAR2(20) := 'Online';
+    fCompra DATE := SYSDATE;
+    nuevoIdReserva NUMBER;
+    clienteExistente NUMBER;
 BEGIN
-    -- Comprobar si existe el cliente
-    BEGIN
-        SELECT REF(c) INTO vCliente FROM Clientes c WHERE c.Correo = pCorreo;
-    EXCEPTION
-        WHEN NO_DATA_FOUND THEN
-            -- Si no existe, crear cliente
-            INSERT INTO Clientes (Correo, Nombre, Telefono)
-            VALUES (pCorreo, pNombre, pTelefono)
-            RETURNING REF(c) INTO vCliente;
-    END;
+    INSERT INTO Clientes (Correo, Nombre, Telefono) VALUES (email, nom, tfn);
 
-    -- Actualizar el cliente (si no existía, se creó en el paso anterior y aquí simplemente se vuelve a introducir su misma información)
-    UPDATE Clientes c
-    SET Nombre = pNombre, Telefono = pTelefono
-    WHERE c.Correo = pCorreo;
+    -- Generar el nuevo ID de reserva y realizar la inserción
+    SELECT secuencia_idReserva.NEXTVAL INTO nuevoIdReserva FROM dual;
+    INSERT INTO Reservas (idReserva, idSesion, Cliente, FormaPago, FechaCompra, Entradas)
+    VALUES (nuevoIdReserva, sesion, email, pago, fCompra, v_entradas);
 
-    -- Obtener la referencia de la sesión
-    SELECT REF(s) INTO vSesion FROM Sesiones s WHERE s.idSesion = pIdSesion;
-    
-    -- Crear reserva
-    INSERT INTO Reservas (idReserva, idSesion, idCliente, FormaPago, FechaCompra, Entradas)
-    VALUES (secuencia_idReserva.NEXTVAL, vSesion, vCliente, pFormaPago, pFechaCompra, pEntradas)
-    RETURNING idReserva INTO vIdReserva;
+    -- Bucle para insertar las butacas seleccionadas
+    FOR i IN 1..v_butacas.COUNT LOOP
+            INSERT INTO ButacasReservas (idButacaReserva, idButaca, NumeroSala, idReserva)
+            VALUES (secuencia_idButacaReserva.NEXTVAL, v_butacas(i), sala, nuevoIdReserva);
+        END LOOP;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+END;
+/
 
-    -- Crear asociaciones de butacas a la reserva
-    FOR i IN 1..pButacas.COUNT LOOP
-        SELECT REF(b) INTO vButaca FROM Butacas b 
-        WHERE b.idButaca = SUBSTR(pButacas(i), 1, INSTR(pButacas(i), '-') - 1)
-        AND b.NumeroSala = SUBSTR(pButacas(i), INSTR(pButacas(i), '-') + 1);
 
-        INSERT INTO ButacasReservas (idButacaReserva, refButaca, refReserva)
-        VALUES (secuencia_idButacaReserva.NEXTVAL, vButaca, (SELECT REF(r) FROM Reservas r WHERE r.idReserva = vIdReserva));
-    END LOOP;
-    
+
+-- Procedimiento para eliminar una reserva, dado su ID
+CREATE OR REPLACE PROCEDURE eliminar_reserva(p_idReserva IN NUMBER) AS
+BEGIN
+    -- Antes de eliminar la reserva, se eliminan las butacas asociadas (Disparador)
+    DELETE FROM Reservas WHERE idReserva = p_idReserva;
     COMMIT;
 END;
 /
 
--- Creación de procedimiento para eliminar una reserva
-CREATE OR REPLACE PROCEDURE EliminarReserva(
-    p_id_reserva IN Reservas.idReserva%TYPE
-) AS
-    ListaEntradasNueva TipoEntradaArray;
+-- Procedimiento para listar todas las reservas
+CREATE OR REPLACE PROCEDURE listar_reservas AS
+    CURSOR c_reservas IS
+        SELECT * FROM Reservas;
 BEGIN
-    -- Obtener y vaciar la lista de entradas de la reserva
-    SELECT Entradas INTO ListaEntradasNueva
-    FROM Reservas
-    WHERE idReserva = p_id_reserva;
+    FOR rec IN c_reservas LOOP
+            DBMS_OUTPUT.PUT_LINE('ID Reserva: ' || rec.idReserva || ' - Cliente: ' || rec.Cliente ||
+                                 ' - Forma de Pago: ' || rec.FormaPago || ' - Fecha de Compra: ' || rec.FechaCompra);
+        END LOOP;
+END;
+/
 
-    -- Se asume que el VARRAY debe vaciarse completamente para su eliminación
-    ListaEntradasNueva.DELETE;
+-- Procedimiento para listar todas las reservas de un cliente
+CREATE OR REPLACE PROCEDURE listar_reservas_cliente(p_correo IN VARCHAR2) AS
+    CURSOR c_reservas IS
+        SELECT * FROM Reservas WHERE Cliente = p_correo;
+BEGIN
+    FOR rec IN c_reservas LOOP
+            DBMS_OUTPUT.PUT_LINE('ID Reserva: ' || rec.idReserva || ' - Cliente: ' || rec.Cliente ||
+                                 ' - Forma de Pago: ' || rec.FormaPago || ' - Fecha de Compra: ' || rec.FechaCompra);
+        END LOOP;
+END;
+/
 
-    -- Actualizar la reserva con el VARRAY vacío
-    UPDATE Reservas
-    SET Entradas = ListaEntradasNueva
-    WHERE idReserva = p_id_reserva;
-
-    -- Eliminar las asociaciones entre butacas y la reserva
-    DELETE FROM ButacasReservas
-    WHERE refReserva IN (SELECT REF(r) FROM Reservas r WHERE r.idReserva = p_id_reserva);
-
-    -- Eliminar la reserva
-    DELETE FROM Reservas
-    WHERE idReserva = p_id_reserva;
-
+-- Procedimiento para registrar un cliente, dado su correo, nombre y teléfono
+CREATE OR REPLACE PROCEDURE registrar_cliente(p_correo IN VARCHAR2, p_nombre IN VARCHAR2, p_telefono IN VARCHAR2) AS
+BEGIN
+    -- Antes de registrar el cliente, se comprueba si ya existe (disparador)
+    INSERT INTO Clientes (Correo, Nombre, Telefono) VALUES (p_correo, p_nombre, p_telefono);
     COMMIT;
 END;
 /
 
--- Creación de procedimiento para listar todas las reservas
-CREATE OR REPLACE PROCEDURE ListarReservas(p_cursor OUT SYS_REFCURSOR)
-IS
+-- Procedimiento para modificar un cliente, dado su correo, nombre y teléfono
+CREATE OR REPLACE PROCEDURE modificar_cliente(p_correo IN VARCHAR2, p_nombre IN VARCHAR2, p_telefono IN VARCHAR2) AS
 BEGIN
-    -- Abre un cursor que selecciona detalles básicos de las reservas
-    OPEN p_cursor FOR
-        SELECT r.idReserva, r.idSesion, r.idCliente, r.FechaCompra
-        FROM Reservas r;
-END;
-/
-
--- Creación de procedimiento para listar detalles de una reserva específica
-CREATE OR REPLACE PROCEDURE ListarReserva(p_idReserva IN Reservas.idReserva%TYPE, p_cursor OUT SYS_REFCURSOR)
-IS
-BEGIN
-    -- Abre un cursor que selecciona detalles de una reserva específica
-    OPEN p_cursor FOR
-        SELECT r.idReserva, r.idSesion, r.idCliente, r.FechaCompra
-        FROM Reservas r
-        WHERE r.idReserva = p_idReserva;
-END;
-/
-
--- Creación de procedimiento para registrar un nuevo cliente
-CREATE OR REPLACE PROCEDURE RegistrarCliente(
-    p_nombre_cliente IN Clientes.Nombre%TYPE,
-    p_correo_cliente IN Clientes.Correo%TYPE,
-    p_telefono_cliente IN Clientes.Telefono%TYPE
-) AS
-BEGIN
-    -- Insertar un nuevo cliente en la tabla Clientes
-    INSERT INTO Clientes (Correo, Nombre, Telefono)
-    VALUES (p_correo_cliente, p_nombre_cliente, p_telefono_cliente);
-    
+    -- Antes de modificar el cliente, se comprueba si existe (disparador)
+    UPDATE Clientes SET Nombre = p_nombre, Telefono = p_telefono WHERE Correo = p_correo;
     COMMIT;
 END;
 /
 
--- Creación de procedimiento para modificar detalles de un cliente
-CREATE OR REPLACE PROCEDURE ModificarCliente(
-    p_id_cliente IN Clientes.Correo%TYPE,
-    p_nombre_cliente IN Clientes.Nombre%TYPE,
-    p_telefono_cliente IN Clientes.Telefono%TYPE
-) AS
+-- Procedimiento para eliminar un cliente, dado su correo
+CREATE OR REPLACE PROCEDURE eliminar_cliente(p_correo IN VARCHAR2) AS
 BEGIN
-    -- Actualizar información de un cliente existente
-    UPDATE Clientes
-    SET Nombre = p_nombre_cliente, Telefono = p_telefono_cliente
-    WHERE Correo = p_id_cliente;
-    
+    -- Antes de eliminar el cliente, se eliminan las reservas asociadas (Disparador)
+    DELETE FROM Clientes WHERE Correo = p_correo;
     COMMIT;
 END;
 /
 
--- Creación de procedimiento para eliminar un cliente
-CREATE OR REPLACE PROCEDURE EliminarCliente(
-    p_id_cliente IN Clientes.Correo%TYPE
-) AS
+-- Procedimiento para listar todos los clientes
+CREATE OR REPLACE PROCEDURE listar_clientes AS
+    CURSOR c_clientes IS
+        SELECT * FROM Clientes;
 BEGIN
-    -- Eliminar un cliente de la tabla Clientes
-    DELETE FROM Clientes
-    WHERE Correo = p_id_cliente;
-    
-    COMMIT;
-END;
-/
-
--- Creación de procedimiento para listar todos los clientes
-CREATE OR REPLACE PROCEDURE ListarClientes(p_cursor OUT SYS_REFCURSOR)
-IS
-BEGIN
-    -- Abre un cursor que selecciona detalles de todos los clientes
-    OPEN p_cursor FOR
-        SELECT Correo, Nombre, Telefono
-        FROM Clientes;
-END;
-/
-
--- Creación de procedimiento para listar detalles de un cliente específico
-CREATE OR REPLACE PROCEDURE ListarCliente(p_idCliente IN Clientes.Correo%TYPE, p_cursor OUT SYS_REFCURSOR)
-IS
-BEGIN
-    -- Abre un cursor que selecciona detalles de un cliente específico
-    OPEN p_cursor FOR
-        SELECT Correo, Nombre, Telefono
-        FROM Clientes
-        WHERE Correo = p_idCliente;
+    FOR rec IN c_clientes LOOP
+            DBMS_OUTPUT.PUT_LINE('Correo: ' || rec.Correo || ' - Nombre: ' || rec.Nombre || ' - Teléfono: ' || rec.Telefono);
+        END LOOP;
 END;
 /

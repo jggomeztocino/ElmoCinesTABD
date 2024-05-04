@@ -1,0 +1,12 @@
+DROP PROCEDURE listar_peliculas;
+DROP PROCEDURE mostrar_info_pelicula;
+DROP PROCEDURE sesiones_con_butacas_libres;
+DROP PROCEDURE butacas_ocupadas;
+DROP PROCEDURE realizar_reserva;
+DROP PROCEDURE eliminar_reserva;
+DROP PROCEDURE listar_reservas;
+DROP PROCEDURE listar_reservas_cliente;
+DROP PROCEDURE registrar_cliente;
+DROP PROCEDURE modificar_cliente;
+DROP PROCEDURE eliminar_cliente;
+DROP PROCEDURE listar_clientes;

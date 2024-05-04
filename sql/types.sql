@@ -14,7 +14,8 @@ CREATE OR REPLACE TYPE TipoPelicula AS OBJECT (
 -- Tipo para Sesión
 CREATE OR REPLACE TYPE TipoSesion AS OBJECT (
     idSesion NUMBER,
-    idPelicula REF TipoPelicula,
+    --idPelicula REF TipoPelicula,
+    idPelicula VARCHAR2(20),
     NumeroSala NUMBER(2),
     FechaHora TIMESTAMP
 );
@@ -46,7 +47,8 @@ CREATE OR REPLACE TYPE TipoMenu AS OBJECT (
 -- Tipo para Entrada
 CREATE OR REPLACE TYPE TipoEntrada AS OBJECT (
     idEntrada NUMBER,
-    idMenu REF TipoMenu,
+    --idMenu REF TipoMenu,
+    idMenu NUMBER,
     Descripcion VARCHAR2(200),
     Precio NUMBER(10, 2)
 );
@@ -57,8 +59,10 @@ CREATE OR REPLACE TYPE TipoEntradaArray AS VARRAY(5) OF TipoEntrada;
 -- Tipo para Reserva
 CREATE OR REPLACE TYPE TipoReserva AS OBJECT (
     idReserva NUMBER,
-    idSesion REF TipoSesion,
-    idCliente REF TipoCliente,
+    -- idSesion REF TipoSesion,
+    -- idCliente REF TipoCliente,
+    idSesion NUMBER,
+    Cliente VARCHAR2(100),
     FormaPago VARCHAR2(50),
     FechaCompra TIMESTAMP,
     Entradas TipoEntradaArray
@@ -68,8 +72,15 @@ CREATE OR REPLACE TYPE TipoReserva AS OBJECT (
 -- Tipo para la asociación N:M entre Butaca y Reserva
 CREATE OR REPLACE TYPE TipoButacaReserva AS OBJECT (
     idButacaReserva NUMBER,
-    refButaca REF TipoButaca,
-    refReserva REF TipoReserva
+    idButaca NUMBER,
+    NumeroSala NUMBER,
+    idReserva Number
+    --refButaca REF TipoButaca,
+    --refReserva REF TipoReserva
 );
 /
+
+CREATE OR REPLACE TYPE ButacasSeleccionadas AS VARRAY(5) OF NUMBER;
+/
+
 COMMIT;
