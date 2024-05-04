@@ -20,32 +20,6 @@ BEGIN
 END;
 /
 
--- Disparador para verificar y actualizar o insertar cliente antes de reservar
-CREATE OR REPLACE TRIGGER existe_cliente
-    BEFORE INSERT OR UPDATE ON Clientes
-    FOR EACH ROW
-DECLARE
-    cliente_existente NUMBER;
-BEGIN
-    -- Verificar si el cliente ya existe
-    SELECT COUNT(*)
-    INTO cliente_existente
-    FROM Clientes
-    WHERE Correo = :NEW.Correo;
-
-    IF cliente_existente = 0 THEN
-        -- Si el cliente no existe, insertar un nuevo cliente
-        INSERT INTO Clientes (Correo, Nombre, Telefono)
-        VALUES (:NEW.Correo, :NEW.Nombre, :NEW.Telefono);
-    ELSE
-        -- Si el cliente existe, actualizar su información
-        UPDATE Clientes
-        SET Nombre = :NEW.Nombre, Telefono = :NEW.Telefono
-        WHERE Correo = :NEW.Correo;
-    END IF;
-END;
-/
-
 -- Disparador para verificar la disponibilidad de butacas antes de registrar una reserva
 CREATE OR REPLACE TRIGGER disponibilidad_butacas
     BEFORE INSERT ON Reservas

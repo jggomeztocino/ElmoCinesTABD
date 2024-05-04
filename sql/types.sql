@@ -55,6 +55,7 @@ CREATE OR REPLACE TYPE TipoEntrada AS OBJECT (
 /
 
 CREATE OR REPLACE TYPE TipoEntradaArray AS VARRAY(5) OF TipoEntrada;
+/
 
 -- Tipo para Reserva
 CREATE OR REPLACE TYPE TipoReserva AS OBJECT (

@@ -10,3 +10,4 @@ DROP PROCEDURE registrar_cliente;
 DROP PROCEDURE modificar_cliente;
 DROP PROCEDURE eliminar_cliente;
 DROP PROCEDURE listar_clientes;
+DROP PROCEDURE INSERTORUPDATECLIENTE;

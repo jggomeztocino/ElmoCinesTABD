@@ -30,8 +30,6 @@ def generar_entrada():
     Descripcion = random.choice(["Entrada adulta", "Entrada infantil"])
     Precio = 6 if Descripcion == "Entrada adulta" else 4
     entrada = {"idEntrada": idEntrada, "idMenu": idMenu, "Descripcion": Descripcion, "Precio": Precio}
-    #sql.append(f"INSERT INTO Entradas (idEntrada, idMenu, Descripcion, Precio) VALUES ({idEntrada}, {idMenu}, '{Descripcion}', {Precio});")
-    #sql.append(f"COMMIT;")
     return entrada
 
 def generar_reservaButaca(sql, idButaca, NumeroSala):
