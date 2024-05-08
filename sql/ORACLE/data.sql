@@ -280,6 +280,8 @@ INSERT INTO Butacas (idButaca, NumeroSala) VALUES (secuencia_idButaca.NEXTVAL, 8
 INSERT INTO Butacas (idButaca, NumeroSala) VALUES (secuencia_idButaca.NEXTVAL, 8);
 INSERT INTO Butacas (idButaca, NumeroSala) VALUES (secuencia_idButaca.NEXTVAL, 8);
 INSERT INTO Butacas (idButaca, NumeroSala) VALUES (secuencia_idButaca.NEXTVAL, 8);
+COMMIT;
+
 -- Sesiones
 INSERT INTO Sesiones (idSesion, idPelicula, NumeroSala, FechaHora) VALUES (secuencia_idSesion.NEXTVAL, 'wicked', 6, TO_TIMESTAMP('2024-05-05 15:0:00', 'YYYY-MM-DD HH24:MI:SS'));
 COMMIT;
