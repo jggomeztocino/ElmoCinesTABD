@@ -1,52 +1,48 @@
--- Procedimiento para listar el Título y el UrlCover de todas las películas
-CREATE OR REPLACE PROCEDURE listar_peliculas AS
-    CURSOR c_peliculas IS
-        SELECT Titulo, UrlCover FROM Peliculas;
+-------------------------------------   PELÍCULAS   -------------------------------------
+-- Procedimiento para eliminar una película, dado su ID
+CREATE OR REPLACE PROCEDURE eliminar_pelicula(p_idPelicula IN VARCHAR2) AS
 BEGIN
-    FOR rec IN c_peliculas LOOP
-            DBMS_OUTPUT.PUT_LINE('Título: ' || rec.Titulo || ' - URL Cover: ' || rec.UrlCover);
-        END LOOP;
+    -- Antes de eliminar la película, se eliminan las sesiones, reservas y butacas asociadas (Disparador)
+    DELETE FROM Peliculas WHERE idPelicula = p_idPelicula;
+    COMMIT;
+END;
+
+-- Procedimiento para elmininar todas las películas
+CREATE OR REPLACE PROCEDURE eliminar_todas_peliculas AS
+BEGIN
+    -- Antes de eliminar todas las películas, se eliminan las sesiones, reservas y butacas asociadas (Disparador)
+    DELETE FROM Peliculas;
+    COMMIT;
+END;
+
+----------------------------------------   CLIENTES   ---------------------------------------
+-- Procedimiento para modificar un cliente, dado su correo, nombre y teléfono
+CREATE OR REPLACE PROCEDURE modificar_cliente(p_correo IN VARCHAR2, p_nombre IN VARCHAR2, p_telefono IN VARCHAR2) AS
+BEGIN
+    -- Antes de modificar el cliente, se comprueba si existe (disparador)
+    UPDATE Clientes SET Nombre = p_nombre, Telefono = p_telefono WHERE Correo = p_correo;
+    COMMIT;
 END;
 /
 
--- Procedimiento para listar toda la información de una película, dado su ID
-CREATE OR REPLACE PROCEDURE mostrar_info_pelicula(p_idPelicula IN VARCHAR2) AS
-    CURSOR c_pelicula IS
-        SELECT * FROM Peliculas WHERE idPelicula = p_idPelicula;
+-- Procedimiento para eliminar un cliente, dado su correo
+CREATE OR REPLACE PROCEDURE eliminar_cliente(p_correo IN VARCHAR2) AS
 BEGIN
-    FOR rec IN c_pelicula LOOP
-            DBMS_OUTPUT.PUT_LINE('ID: ' || rec.idPelicula || ' Título: ' || rec.Titulo ||
-                                 ' Directores: ' || rec.Directores || ' Actores: ' || rec.Actores ||
-                                 ' Duración: ' || rec.Duracion || ' Sinopsis: ' || rec.Sinopsis ||
-                                 ' URL Cover: ' || rec.UrlCover || ' URL Trailer: ' || rec.UrlTrailer);
-        END LOOP;
+    -- Antes de eliminar el cliente, se eliminan las reservas asociadas (Disparador)
+    DELETE FROM Clientes WHERE Correo = p_correo;
+    COMMIT;
 END;
 /
 
--- Procedimiento para listar el idSesion y la FechaHora de las Sesiones programadas para una Película que tenga al menos una butaca libre
-CREATE OR REPLACE PROCEDURE sesiones_con_butacas_libres(p_idPelicula IN VARCHAR2) AS
-    CURSOR c_sesiones IS
-        SELECT idSesion, FechaHora FROM Sesiones WHERE idPelicula = p_idPelicula;
+-- Procedimiento para eliminar todos los clientes
+CREATE OR REPLACE PROCEDURE eliminar_todos_clientes AS
 BEGIN
-    FOR rec IN c_sesiones LOOP
-            IF calcular_butacas_libres(rec.idSesion) > 0 THEN
-                DBMS_OUTPUT.PUT_LINE('ID Sesión: ' || rec.idSesion || ' - Fecha y Hora: ' || rec.FechaHora);
-            END IF;
-        END LOOP;
+    -- Antes de eliminar todos los clientes, se eliminan las reservas asociadas (Disparador)
+    DELETE FROM Clientes;
+    COMMIT;
 END;
-/
 
--- Procedimiento para listar las butacas ocupadas para un idSesion dado
-CREATE OR REPLACE PROCEDURE butacas_ocupadas(p_idSesion IN NUMBER) AS
-    CURSOR c_butacas IS
-        SELECT idButaca, NumeroSala FROM ButacasReservas WHERE idReserva IN (SELECT idReserva FROM Reservas WHERE idSesion = p_idSesion);
-BEGIN
-    FOR rec IN c_butacas LOOP
-            DBMS_OUTPUT.PUT_LINE('ID Butaca: ' || rec.idButaca || ' - Número de Sala: ' || rec.NumeroSala);
-        END LOOP;
-END;
-/
-
+------------------------------------   RESERVAS   ------------------------------------
 CREATE OR REPLACE PROCEDURE realizar_reserva (
     sesion IN NUMBER,
     sala IN NUMBER,
@@ -80,8 +76,6 @@ EXCEPTION
 END;
 /
 
-
-
 -- Procedimiento para eliminar una reserva, dado su ID
 CREATE OR REPLACE PROCEDURE eliminar_reserva(p_idReserva IN NUMBER) AS
 BEGIN
@@ -91,80 +85,27 @@ BEGIN
 END;
 /
 
--- Procedimiento para listar todas las reservas
-CREATE OR REPLACE PROCEDURE listar_reservas AS
-    CURSOR c_reservas IS
-        SELECT * FROM Reservas;
+--------------------------------------------   SESIONES   --------------------------------------------
+-- Procedimiento para eliminar una sesión, dado su ID
+CREATE OR REPLACE PROCEDURE eliminar_sesion(p_idSesion IN NUMBER) AS
 BEGIN
-    FOR rec IN c_reservas LOOP
-            DBMS_OUTPUT.PUT_LINE('ID Reserva: ' || rec.idReserva || ' - Cliente: ' || rec.Cliente ||
-                                 ' - Forma de Pago: ' || rec.FormaPago || ' - Fecha de Compra: ' || rec.FechaCompra);
-        END LOOP;
-END;
-/
-
--- Procedimiento para listar todas las reservas de un cliente
-CREATE OR REPLACE PROCEDURE listar_reservas_cliente(p_correo IN VARCHAR2) AS
-    CURSOR c_reservas IS
-        SELECT * FROM Reservas WHERE Cliente = p_correo;
-BEGIN
-    FOR rec IN c_reservas LOOP
-            DBMS_OUTPUT.PUT_LINE('ID Reserva: ' || rec.idReserva || ' - Cliente: ' || rec.Cliente ||
-                                 ' - Forma de Pago: ' || rec.FormaPago || ' - Fecha de Compra: ' || rec.FechaCompra);
-        END LOOP;
-END;
-/
-
--- Procedimiento para registrar un cliente, dado su correo, nombre y teléfono
-CREATE OR REPLACE PROCEDURE registrar_cliente(p_correo IN VARCHAR2, p_nombre IN VARCHAR2, p_telefono IN VARCHAR2) AS
-BEGIN
-    -- Antes de registrar el cliente, se comprueba si ya existe (disparador)
-    INSERT INTO Clientes (Correo, Nombre, Telefono) VALUES (p_correo, p_nombre, p_telefono);
+    -- Antes de eliminar la sesión, se eliminan las reservas y butacas asociadas (Disparador)
+    DELETE FROM Sesiones WHERE idSesion = p_idSesion;
     COMMIT;
 END;
-/
 
--- Procedimiento para modificar un cliente, dado su correo, nombre y teléfono
-CREATE OR REPLACE PROCEDURE modificar_cliente(p_correo IN VARCHAR2, p_nombre IN VARCHAR2, p_telefono IN VARCHAR2) AS
+-- Procedimiento para eliminar todas las sesiones dado el ID de la película
+CREATE OR REPLACE PROCEDURE eliminar_sesiones_pelicula(p_idPelicula IN VARCHAR2) AS
 BEGIN
-    -- Antes de modificar el cliente, se comprueba si existe (disparador)
-    UPDATE Clientes SET Nombre = p_nombre, Telefono = p_telefono WHERE Correo = p_correo;
+    -- Antes de eliminar todas las sesiones, se eliminan las reservas y butacas asociadas (Disparador)
+    DELETE FROM Sesiones WHERE idPelicula = p_idPelicula;
     COMMIT;
 END;
-/
 
--- Procedimiento para eliminar un cliente, dado su correo
-CREATE OR REPLACE PROCEDURE eliminar_cliente(p_correo IN VARCHAR2) AS
+-- Procedimiento para eliminar todas las sesiones
+CREATE OR REPLACE PROCEDURE eliminar_todas_sesiones AS
 BEGIN
-    -- Antes de eliminar el cliente, se eliminan las reservas asociadas (Disparador)
-    DELETE FROM Clientes WHERE Correo = p_correo;
+    -- Antes de eliminar todas las sesiones, se eliminan las reservas y butacas asociadas (Disparador)
+    DELETE FROM Sesiones;
     COMMIT;
 END;
-/
-
--- Procedimiento para listar todos los clientes
-CREATE OR REPLACE PROCEDURE listar_clientes AS
-    CURSOR c_clientes IS
-        SELECT * FROM Clientes;
-BEGIN
-    FOR rec IN c_clientes LOOP
-            DBMS_OUTPUT.PUT_LINE('Correo: ' || rec.Correo || ' - Nombre: ' || rec.Nombre || ' - Teléfono: ' || rec.Telefono);
-        END LOOP;
-END;
-/
-
-CREATE OR REPLACE PROCEDURE InsertOrUpdateCliente(p_correo VARCHAR2, p_nombre VARCHAR2, p_telefono VARCHAR2) IS
-    fila_actualizada INTEGER;
-BEGIN
-    UPDATE Clientes
-    SET Nombre = p_nombre, Telefono = p_telefono
-    WHERE Correo = p_correo;
-
-    fila_actualizada := SQL%ROWCOUNT;
-
-    IF fila_actualizada = 0 THEN
-        INSERT INTO Clientes (Correo, Nombre, Telefono)
-        VALUES (p_correo, p_nombre, p_telefono);
-    END IF;
-END;
-/

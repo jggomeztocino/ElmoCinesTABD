@@ -1,43 +1,43 @@
--- Películas
+-- Pelï¿½culas
 INSERT INTO Peliculas (idPelicula, Titulo, Directores, Actores, Duracion, Sinopsis, UrlCover, UrlTrailer)
-VALUES ('argylle', 'Argylle', 'Matthew Vaughn', 'Henry Cavill, Bryce Dallas Howard, Sam Rockwell, Bryan Cranston, Catherine O’Hara, Dua Lipa, Ariana DeBose, John Cena, Samuel L. Jackson', 139, 'Cuando las tramas de sus libros empiezan a parecerse demasiado a las actividades de un siniestro sindicato clandestino, la introvertida autora de novelas de espías Elly Conway y su gato se ven inmersos en el verdadero mundo del espionaje…, donde nada ni nadie es lo que parece.', 'https://i.imgur.com/bjAWuTc.png', 'https://www.youtube-nocookie.com/embed/7mgu9mNZ8Hk?si=JwqMsRSDDgNEgewd');
+VALUES ('argylle', 'Argylle', 'Matthew Vaughn', 'Henry Cavill, Bryce Dallas Howard, Sam Rockwell, Bryan Cranston, Catherine Oï¿½Hara, Dua Lipa, Ariana DeBose, John Cena, Samuel L. Jackson', 139, 'Cuando las tramas de sus libros empiezan a parecerse demasiado a las actividades de un siniestro sindicato clandestino, la introvertida autora de novelas de espï¿½as Elly Conway y su gato se ven inmersos en el verdadero mundo del espionajeï¿½, donde nada ni nadie es lo que parece.', 'https://i.imgur.com/bjAWuTc.png', 'https://www.youtube-nocookie.com/embed/7mgu9mNZ8Hk?si=JwqMsRSDDgNEgewd');
 
 INSERT INTO Peliculas (idPelicula, Titulo, Directores, Actores, Duracion, Sinopsis, UrlCover, UrlTrailer)
-VALUES ('wicked', 'Wicked: Part I', 'Jon M. Chu', 'Cynthia Erivo, Ariana Grande, Michelle Yeoh, Jeff Goldblum, Jonathan Bailey, Ethan Slater, Marissa Bode, Bowen Yang, Bronwyn James, Keala Settle', 165, 'Una amistad improbable surge entre Elphaba y Glinda, dos brujas enfrentadas en la mágica tierra de Oz. Elphaba es injustamente catalogada como una bruja malvada mientras intenta exponer al farsante y corrupto Mago que gobierna la tierra.', 'https://i.imgur.com/rGkbqrw.jpg', 'https://www.youtube-nocookie.com/embed/F1dvX9Vs0ns?si=T2O1ceF16vLVLArM');
+VALUES ('wicked', 'Wicked: Part I', 'Jon M. Chu', 'Cynthia Erivo, Ariana Grande, Michelle Yeoh, Jeff Goldblum, Jonathan Bailey, Ethan Slater, Marissa Bode, Bowen Yang, Bronwyn James, Keala Settle', 165, 'Una amistad improbable surge entre Elphaba y Glinda, dos brujas enfrentadas en la mï¿½gica tierra de Oz. Elphaba es injustamente catalogada como una bruja malvada mientras intenta exponer al farsante y corrupto Mago que gobierna la tierra.', 'https://i.imgur.com/rGkbqrw.jpg', 'https://www.youtube-nocookie.com/embed/F1dvX9Vs0ns?si=T2O1ceF16vLVLArM');
 
 INSERT INTO Peliculas (idPelicula, Titulo, Directores, Actores, Duracion, Sinopsis, UrlCover, UrlTrailer)
-VALUES ('wonka', 'Wonka', 'Paul King', 'Timothée Chalamet, Calah Lane, Keegan-Michael Key, Paterson Joseph, Matt Lucas, Mathew Baynton, Sally Hawkins, Rowan Atkinson, Jim Carter, Olivia Colman, Hugh Grant', 116, 'Wonka es una película de fantasía musical de 2023 dirigida por Paul King, quien coescribió el guion con Simon Farnaby basado en una historia de King. Cuenta la historia de origen de Willy Wonka, un personaje de la novela de 1964 Charlie y la fábrica de chocolate de Roald Dahl, que representa sus primeros días como chocolatero.', 'https://i.imgur.com/YVrTNot.jpg', 'https://www.youtube-nocookie.com/embed/otNh9bTjXWg?si=m7QWpRY7we67Ftrp');
+VALUES ('wonka', 'Wonka', 'Paul King', 'Timothï¿½e Chalamet, Calah Lane, Keegan-Michael Key, Paterson Joseph, Matt Lucas, Mathew Baynton, Sally Hawkins, Rowan Atkinson, Jim Carter, Olivia Colman, Hugh Grant', 116, 'Wonka es una pelï¿½cula de fantasï¿½a musical de 2023 dirigida por Paul King, quien coescribiï¿½ el guion con Simon Farnaby basado en una historia de King. Cuenta la historia de origen de Willy Wonka, un personaje de la novela de 1964 Charlie y la fï¿½brica de chocolate de Roald Dahl, que representa sus primeros dï¿½as como chocolatero.', 'https://i.imgur.com/YVrTNot.jpg', 'https://www.youtube-nocookie.com/embed/otNh9bTjXWg?si=m7QWpRY7we67Ftrp');
 
 INSERT INTO Peliculas (idPelicula, Titulo, Directores, Actores, Duracion, Sinopsis, UrlCover, UrlTrailer)
-VALUES ('madame_web', 'Madame Web', 'S. J. Clarkson', 'Dakota Johnson, Sydney Sweeney, Isabela Merced, Celeste O´Connor, Tahar Rahim, Mike Epps, Emma Roberts, Adam Scott', 116, 'Madame Web es una película de superhéroes estadounidense de 2024 que presenta al personaje de cómics de Marvel del mismo nombre. Producida por Columbia Pictures y Di Bonaventura Pictures en asociación con Marvel Entertainment y TSG Entertainment, y distribuida por Sony Pictures Releasing, es la cuarta película en el Universo Spider-Man de Sony (SSU).', 'https://i.imgur.com/AXD5t8Z.png', 'https://www.youtube-nocookie.com/embed/s_76M4c4LTo?si=m6w7eGTxBH1i_yEm');
+VALUES ('madame_web', 'Madame Web', 'S. J. Clarkson', 'Dakota Johnson, Sydney Sweeney, Isabela Merced, Celeste Oï¿½Connor, Tahar Rahim, Mike Epps, Emma Roberts, Adam Scott', 116, 'Madame Web es una pelï¿½cula de superhï¿½roes estadounidense de 2024 que presenta al personaje de cï¿½mics de Marvel del mismo nombre. Producida por Columbia Pictures y Di Bonaventura Pictures en asociaciï¿½n con Marvel Entertainment y TSG Entertainment, y distribuida por Sony Pictures Releasing, es la cuarta pelï¿½cula en el Universo Spider-Man de Sony (SSU).', 'https://i.imgur.com/AXD5t8Z.png', 'https://www.youtube-nocookie.com/embed/s_76M4c4LTo?si=m6w7eGTxBH1i_yEm');
 
 INSERT INTO Peliculas (idPelicula, Titulo, Directores, Actores, Duracion, Sinopsis, UrlCover, UrlTrailer)
-VALUES ('dune', 'Dune', 'Denis Villeneuve', 'Timothée Chalamet, Rebecca Ferguson, Oscar Isaac, Josh Brolin, Stellan Skarsgård, Dave Bautista, Stephen McKinley Henderson, Zendaya, Chang Chen, Sharon Duncan-Brewster, Charlotte Rampling, Jason Momoa, Javier Bardem', 155, 'Dune es una película de ciencia ficción épica estadounidense de 2021 dirigida y coproducida por Denis Villeneuve, quien coescribió el guion con Jon Spaihts y Eric Roth. Es la primera de una adaptación en dos partes de la novela de 1965 del mismo nombre de Frank Herbert.', 'https://i.imgur.com/TqqXEg4.png', 'https://www.youtube-nocookie.com/embed/n9xhJrPXop4?si=r4AsnaS5Kr3ER-0d');
+VALUES ('dune', 'Dune', 'Denis Villeneuve', 'Timothï¿½e Chalamet, Rebecca Ferguson, Oscar Isaac, Josh Brolin, Stellan Skarsgï¿½rd, Dave Bautista, Stephen McKinley Henderson, Zendaya, Chang Chen, Sharon Duncan-Brewster, Charlotte Rampling, Jason Momoa, Javier Bardem', 155, 'Dune es una pelï¿½cula de ciencia ficciï¿½n ï¿½pica estadounidense de 2021 dirigida y coproducida por Denis Villeneuve, quien coescribiï¿½ el guion con Jon Spaihts y Eric Roth. Es la primera de una adaptaciï¿½n en dos partes de la novela de 1965 del mismo nombre de Frank Herbert.', 'https://i.imgur.com/TqqXEg4.png', 'https://www.youtube-nocookie.com/embed/n9xhJrPXop4?si=r4AsnaS5Kr3ER-0d');
 
 INSERT INTO Peliculas (idPelicula, Titulo, Directores, Actores, Duracion, Sinopsis, UrlCover, UrlTrailer)
-VALUES ('kung_fu_panda_4', 'Kung Fu Panda 4', 'Mike Mitchell', 'Jack Black, Awkwafina, Bryan Cranston, James Hong, Ian McShane, Ke Huy Quan, Dustin Hoffman, Viola Davis', 94, 'Kung Fu Panda 4 es una película de comedia de artes marciales animada estadounidense de 2024 producida por DreamWorks Animation y distribuida por Universal Pictures. Es la cuarta entrega de la franquicia Kung Fu Panda y la secuela de Kung Fu Panda 3 (2016).', 'https://i.imgur.com/gYIVwq7.png', 'https://www.youtube-nocookie.com/embed/_inKs4eeHiI?si=jj8LRu3iGAFs9ixj');
+VALUES ('kung_fu_panda_4', 'Kung Fu Panda 4', 'Mike Mitchell', 'Jack Black, Awkwafina, Bryan Cranston, James Hong, Ian McShane, Ke Huy Quan, Dustin Hoffman, Viola Davis', 94, 'Kung Fu Panda 4 es una pelï¿½cula de comedia de artes marciales animada estadounidense de 2024 producida por DreamWorks Animation y distribuida por Universal Pictures. Es la cuarta entrega de la franquicia Kung Fu Panda y la secuela de Kung Fu Panda 3 (2016).', 'https://i.imgur.com/gYIVwq7.png', 'https://www.youtube-nocookie.com/embed/_inKs4eeHiI?si=jj8LRu3iGAFs9ixj');
 
 INSERT INTO Peliculas (idPelicula, Titulo, Directores, Actores, Duracion, Sinopsis, UrlCover, UrlTrailer)
-VALUES ('one_love', 'One Love', 'Reinaldo Marcus Green', 'Kingsley Ben-Adir, Lashana Lynch, James Norton, Tosin Cole, Umi Myers, Anthony Welsh, Don Taylor, Nia Ashi, Teen Rita Marley, Quan-Dajai Henriques, Teen Bob Marley, Kait Tenison, Bene Gesserit Sister', 104, 'Bob Marley: One Love celebra la vida y la música de un ícono que inspiró a generaciones a través de su mensaje de amor y unidad. Por primera vez en la gran pantalla, descubre la poderosa historia de superación de Bob y el viaje detrás de su música revolucionaria.', 'https://i.imgur.com/vzPsQ5C.png', 'https://www.youtube-nocookie.com/embed/ajw425Kuvtw?si=Ordk2lArJ359PQpF');
+VALUES ('one_love', 'One Love', 'Reinaldo Marcus Green', 'Kingsley Ben-Adir, Lashana Lynch, James Norton, Tosin Cole, Umi Myers, Anthony Welsh, Don Taylor, Nia Ashi, Teen Rita Marley, Quan-Dajai Henriques, Teen Bob Marley, Kait Tenison, Bene Gesserit Sister', 104, 'Bob Marley: One Love celebra la vida y la mï¿½sica de un ï¿½cono que inspirï¿½ a generaciones a travï¿½s de su mensaje de amor y unidad. Por primera vez en la gran pantalla, descubre la poderosa historia de superaciï¿½n de Bob y el viaje detrï¿½s de su mï¿½sica revolucionaria.', 'https://i.imgur.com/vzPsQ5C.png', 'https://www.youtube-nocookie.com/embed/ajw425Kuvtw?si=Ordk2lArJ359PQpF');
 
 INSERT INTO Peliculas (idPelicula, Titulo, Directores, Actores, Duracion, Sinopsis, UrlCover, UrlTrailer)
-VALUES ('dune2', 'Dune: Part II', 'Denis Villeneuve', 'Timothée Chalamet, Rebecca Ferguson, Josh Brolin, Stellan Skarsgård, Dave Bautista, Zendaya, Charlotte Rampling, Javier Bardem, Austin Butler, Florence Pugh, Christopher Walken, Léa Seydoux, Souheila Yacoub', 165, 'Dune: Part Two es una película de ciencia ficción épica estadounidense de 2024 dirigida y coproducida por Denis Villeneuve, quien coescribió el guion con Jon Spaihts. La secuela de Dune (2021), es la segunda de una adaptación en dos partes de la novela de 1965 Dune de Frank Herbert.', 'https://i.imgur.com/oQ3Zltb.png', 'https://www.youtube-nocookie.com/embed/Way9Dexny3w?si=43_adQN2ZFaTawz6');
+VALUES ('dune2', 'Dune: Part II', 'Denis Villeneuve', 'Timothï¿½e Chalamet, Rebecca Ferguson, Josh Brolin, Stellan Skarsgï¿½rd, Dave Bautista, Zendaya, Charlotte Rampling, Javier Bardem, Austin Butler, Florence Pugh, Christopher Walken, Lï¿½a Seydoux, Souheila Yacoub', 165, 'Dune: Part Two es una pelï¿½cula de ciencia ficciï¿½n ï¿½pica estadounidense de 2024 dirigida y coproducida por Denis Villeneuve, quien coescribiï¿½ el guion con Jon Spaihts. La secuela de Dune (2021), es la segunda de una adaptaciï¿½n en dos partes de la novela de 1965 Dune de Frank Herbert.', 'https://i.imgur.com/oQ3Zltb.png', 'https://www.youtube-nocookie.com/embed/Way9Dexny3w?si=43_adQN2ZFaTawz6');
 
--- Menús
+-- Menï¿½s
+INSERT INTO Menus (idMenu, Descripcion, Precio)
+VALUES (secuencia_idMenu.NEXTVAL, 'Sin menï¿½ - Sin menï¿½', 0);
+
+INSERT INTO Menus (idMenu, Descripcion, Precio)
+VALUES (secuencia_idMenu.NEXTVAL, 'Menï¿½ infantil - Incluye un bol de palomitas pequeï¿½o y una botella de agua.', 4);
+
+INSERT INTO Menus (idMenu, Descripcion, Precio)
+VALUES (secuencia_idMenu.NEXTVAL, 'Menï¿½ mediano - Incluye un bol de palomitas mediano y una bebida mediana a elegir.', 6);
+
+INSERT INTO Menus (idMenu, Descripcion, Precio)
+VALUES (secuencia_idMenu.NEXTVAL, 'Menï¿½ grande - Incluye un bol de palomitas grande y una bebida grande a elegir.', 8);
+
 INSERT INTO Menus (idMenu, Descripcion, Precio)
 VALUES (secuencia_idMenu.NEXTVAL, 'Better Together - Incluye un bol de palomitas extra grande, una bolsa de gominolas y 2 bebidas grandes a elegir.', 10);
-
-INSERT INTO Menus (idMenu, Descripcion, Precio)
-VALUES (secuencia_idMenu.NEXTVAL, 'Menú grande - Incluye un bol de palomitas grande y una bebida grande a elegir.', 8);
-
-INSERT INTO Menus (idMenu, Descripcion, Precio)
-VALUES (secuencia_idMenu.NEXTVAL, 'Menú mediano - Incluye un bol de palomitas mediano y una bebida mediana a elegir.', 6);
-
-INSERT INTO Menus (idMenu, Descripcion, Precio)
-VALUES (secuencia_idMenu.NEXTVAL, 'Menú infantil - Incluye un bol de palomitas pequeño y una botella de agua.', 4);
-
-INSERT INTO Menus (idMenu, Descripcion, Precio)
-VALUES (secuencia_idMenu.NEXTVAL, 'Sin menú - Sin menú', 0);
 
 -- Butacas
 INSERT INTO Butacas (idButaca, NumeroSala) VALUES (secuencia_idButaca.NEXTVAL, 1);

@@ -34,7 +34,7 @@ CREATE SEQUENCE secuencia_idEntrada
 
 -- Secuencia para la tabla Menús
 CREATE SEQUENCE secuencia_idMenu
-    START WITH 1
+    START WITH 0
     INCREMENT BY 1
     NOCACHE
     NOCYCLE;

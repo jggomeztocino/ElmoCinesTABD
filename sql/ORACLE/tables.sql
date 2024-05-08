@@ -46,11 +46,6 @@ MAXTRANS 200
 NOCACHE;
 /
 
-CREATE TABLE Cliente_Control (
-                                 Correo VARCHAR2(255)
-); -- Esta tabla se utiliza para la comprobación de la existencia de un cliente en la base de datos
--- y solo tendrá una instancia, que será eliminada al finalizar la comprobación.
-
 -- Tabla para Reservas
 CREATE TABLE Reservas OF TipoReserva (
                                          CONSTRAINT PK_Reservas PRIMARY KEY (idReserva),

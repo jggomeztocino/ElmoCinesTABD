@@ -75,7 +75,7 @@ CREATE OR REPLACE TYPE TipoButacaReserva AS OBJECT (
     idButacaReserva NUMBER,
     idButaca NUMBER,
     NumeroSala NUMBER,
-    idReserva Number
+    idReserva NUMBER
     --refButaca REF TipoButaca,
     --refReserva REF TipoReserva
 );
