@@ -16,6 +16,24 @@ BEGIN
 END;
 
 ----------------------------------------   CLIENTES   ---------------------------------------
+-- Procedimiento para insertar o actualizar un cliente, dado su correo, nombre y teléfono. 
+-- Si el cliente no existe, se inserta; si existe, se actualiza.
+CREATE OR REPLACE PROCEDURE InsertOrUpdateCliente(p_correo VARCHAR2, p_nombre VARCHAR2, p_telefono VARCHAR2) IS
+    fila_actualizada INTEGER;
+BEGIN
+    UPDATE Clientes
+    SET Nombre = p_nombre, Telefono = p_telefono
+    WHERE Correo = p_correo;
+
+    fila_actualizada := SQL%ROWCOUNT;
+
+    IF fila_actualizada = 0 THEN
+        INSERT INTO Clientes (Correo, Nombre, Telefono)
+        VALUES (p_correo, p_nombre, p_telefono);
+    END IF;
+END;
+/
+
 -- Procedimiento para modificar un cliente, dado su correo, nombre y teléfono
 CREATE OR REPLACE PROCEDURE modificar_cliente(p_correo IN VARCHAR2, p_nombre IN VARCHAR2, p_telefono IN VARCHAR2) AS
 BEGIN

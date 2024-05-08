@@ -18,8 +18,7 @@ CREATE TABLE Butacas OF TipoButaca (
 
 -- Tabla para Clientes
 CREATE TABLE Clientes OF TipoCliente (
-    PRIMARY KEY (idCliente),
-    UNIQUE (Correo)  -- Suponiendo que el correo debe ser único
+    PRIMARY KEY (Correo)
 );
 
 -- Tabla para Reservas

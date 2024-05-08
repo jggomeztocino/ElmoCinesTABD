@@ -13,13 +13,14 @@ def generar_cliente(sql):
     email = f"{nombre.replace(' ', '.').lower()}@guest.elmocines.com"
     telefono = f"6{random.randint(600000000, 699999999)}"
     cliente = {"Nombre": nombre, "Email": email, "Telefono": telefono}
-    sql.append(f"INSERT INTO Clientes (Correo, Nombre, Telefono) VALUES ('{email}', '{nombre}', '{telefono}');")
+    ##sql.append(f"INSERT INTO Clientes (Correo, Nombre, Telefono) VALUES ('{email}', '{nombre}', '{telefono}');")
+    sql.append(f"EXECUTE ClientesPkg.InsertOrUpdateCliente('{email}', '{nombre}', '{telefono}');")
     sql.append(f"COMMIT;")
     return cliente, sql
 
 def generar_entrada():
     idEntrada = f"secuencia_idEntrada.NEXTVAL"
-    idMenu = random.choice([1,2,3,4,5])
+    idMenu = random.choice([1,2,3,4,0])
     Descripcion = random.choice(["Entrada adulta", "Entrada infantil"])
     Precio = 6 if Descripcion == "Entrada adulta" else 4
     entrada = {"idEntrada": idEntrada, "idMenu": idMenu, "Descripcion": Descripcion, "Precio": Precio}
@@ -81,6 +82,22 @@ probabilidad_ocupado = 0.1
 peliculas = ['argylle', 'dune', 'dune2', 'kung_fu_panda_4', 'madame_web', 'one_love', 'wicked', 'wonka']
 
 sql = []
+
+sql.append("-- Tipos")
+sql.append(f"@types.sql")
+
+sql.append("-- Tablas")
+sql.append(f"@tables.sql")
+
+sql.append("-- Secuencias")
+sql.append(f"@sequences.sql")
+
+sql.append("-- Paquetes")
+sql.append(f"@packages.sql")
+
+sql.append("-- Triggers")
+sql.append(f"@triggers.sql")
+
 sql.append("-- Películas")
 sql.append("INSERT INTO Peliculas (idPelicula, Titulo, Directores, Actores, Duracion, Sinopsis, UrlCover, UrlTrailer) VALUES ('argylle', 'Argylle', 'Matthew Vaughn', 'Henry Cavill, Bryce Dallas Howard, Sam Rockwell, Bryan Cranston, Catherine O’Hara, Dua Lipa, Ariana DeBose, John Cena, Samuel L. Jackson', 139, 'Cuando las tramas de sus libros empiezan a parecerse demasiado a las actividades de un siniestro sindicato clandestino, la introvertida autora de novelas de espías Elly Conway y su gato se ven inmersos en el verdadero mundo del espionaje…, donde nada ni nadie es lo que parece.', 'https://i.imgur.com/bjAWuTc.png', 'https://www.youtube-nocookie.com/embed/7mgu9mNZ8Hk?si=JwqMsRSDDgNEgewd');")
 sql.append("INSERT INTO Peliculas (idPelicula, Titulo, Directores, Actores, Duracion, Sinopsis, UrlCover, UrlTrailer) VALUES ('dune', 'Dune', 'Denis Villeneuve', 'Timothée Chalamet, Rebecca Ferguson, Oscar Isaac, Josh Brolin, Stellan Skarsgård, Dave Bautista, Stephen McKinley Henderson, Zendaya, Chang Chen, Sharon Duncan-Brewster, Charlotte Rampling, Jason Momoa, Javier Bardem', 155, 'Dune es una película de ciencia ficción épica estadounidense de 2021 dirigida y coproducida por Denis Villeneuve, quien coescribió el guion con Jon Spaihts y Eric Roth. Es la primera de una adaptación en dos partes de la novela de 1965 del mismo nombre de Frank Herbert.', 'https://i.imgur.com/TqqXEg4.png', 'https://www.youtube-nocookie.com/embed/n9xhJrPXop4?si=r4AsnaS5Kr3ER-0d');")
@@ -108,6 +125,6 @@ for sala in range(1, salas + 1):
 sql.append("-- Sesiones")
 sql += generar_sesiones(sesiones_dia, hora_inicio, fecha_inicio, fecha_fin, salas, nButacas, peliculas)
 
-with open("data.sql", "w") as f:
+with open("../sql/Oracle/script.sql", "w", encoding="utf-8") as f:
     for linea in sql:
         f.write(linea + "\n")

@@ -36,6 +36,7 @@ CREATE SEQUENCE secuencia_idEntrada
 CREATE SEQUENCE secuencia_idMenu
     START WITH 0
     INCREMENT BY 1
+    MINVALUE 0
     NOCACHE
     NOCYCLE;
 /

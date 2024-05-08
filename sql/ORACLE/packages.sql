@@ -1,5 +1,6 @@
 -- Definición de las cabeceras de los paquetes
 CREATE OR REPLACE PACKAGE ClientesPkg AS
+    PROCEDURE InsertOrUpdateCliente(p_correo IN VARCHAR2, p_nombre IN VARCHAR2, p_telefono IN VARCHAR2);
     PROCEDURE modificar_cliente(p_correo IN VARCHAR2, p_nombre IN VARCHAR2, p_telefono IN VARCHAR2);
     PROCEDURE eliminar_cliente(p_correo IN VARCHAR2);
     PROCEDURE eliminar_todos_clientes;
@@ -7,6 +8,7 @@ CREATE OR REPLACE PACKAGE ClientesPkg AS
     FUNCTION listar_clientes RETURN SYS_REFCURSOR;
     FUNCTION listar_reservas_cliente(p_correo IN VARCHAR2) RETURN SYS_REFCURSOR;
 END ClientesPkg;
+/
 
 CREATE OR REPLACE PACKAGE PeliculasPkg AS
     PROCEDURE eliminar_pelicula(p_idPelicula IN VARCHAR2);
@@ -15,6 +17,7 @@ CREATE OR REPLACE PACKAGE PeliculasPkg AS
     FUNCTION listar_peliculas RETURN SYS_REFCURSOR;
     FUNCTION pelicula_mas_exitosa RETURN VARCHAR2;
 END PeliculasPkg;
+/
 
 CREATE OR REPLACE PACKAGE ReservasPkg AS
     PROCEDURE realizar_reserva (
@@ -32,19 +35,37 @@ CREATE OR REPLACE PACKAGE ReservasPkg AS
     FUNCTION calcular_importe_total(id_reserva_in NUMBER) RETURN NUMBER;
     FUNCTION menu_mas_solicitado RETURN VARCHAR2;
 END ReservasPkg;
+/
 
 CREATE OR REPLACE PACKAGE SesionesPkg AS
     PROCEDURE eliminar_sesion(p_idSesion IN NUMBER);
     PROCEDURE eliminar_sesiones_pelicula(p_idPelicula IN VARCHAR2);
     PROCEDURE eliminar_todas_sesiones;
     FUNCTION calcular_butacas_libres(p_idSesion IN NUMBER) RETURN NUMBER;
-    FUNCTION sesiones_con_butacas_libres RETURN SYS_REFCURSOR;
+    FUNCTION sesiones_con_butacas_libres(p_idPelicula IN VARCHAR2) RETURN SYS_REFCURSOR;
     FUNCTION listar_sesion(p_idSesion IN NUMBER) RETURN SYS_REFCURSOR;
     FUNCTION butacas_ocupadas(p_idSesion IN NUMBER) RETURN SYS_REFCURSOR;
 END SesionesPkg;
+/
 
 -- Definición de los cuerpos de los paquetes
 CREATE OR REPLACE PACKAGE BODY ClientesPkg AS
+    PROCEDURE InsertOrUpdateCliente(p_correo IN VARCHAR2, p_nombre IN VARCHAR2, p_telefono IN VARCHAR2)
+    AS
+        fila_actualizada INTEGER;
+    BEGIN
+        UPDATE Clientes
+        SET Nombre = p_nombre, Telefono = p_telefono
+        WHERE Correo = p_correo;
+
+        fila_actualizada := SQL%ROWCOUNT;
+
+        IF fila_actualizada = 0 THEN
+            INSERT INTO Clientes (Correo, Nombre, Telefono)
+            VALUES (p_correo, p_nombre, p_telefono);
+        END IF;
+    END InsertOrUpdateCliente;
+
     FUNCTION listar_cliente (p_correo IN VARCHAR2) RETURN SYS_REFCURSOR
     AS
         c_cliente SYS_REFCURSOR;
@@ -93,6 +114,7 @@ CREATE OR REPLACE PACKAGE BODY ClientesPkg AS
         COMMIT;
     END eliminar_todos_clientes;
 END ClientesPkg;
+/
 
 CREATE OR REPLACE PACKAGE BODY PeliculasPkg AS
     FUNCTION listar_pelicula(p_idPelicula IN VARCHAR2) RETURN SYS_REFCURSOR
@@ -149,6 +171,7 @@ CREATE OR REPLACE PACKAGE BODY PeliculasPkg AS
         COMMIT;
     END eliminar_todas_peliculas;
 END PeliculasPkg;
+/
 
 CREATE OR REPLACE PACKAGE BODY ReservasPkg AS
     FUNCTION listar_reserva(p_idReserva IN NUMBER) RETURN SYS_REFCURSOR
@@ -253,10 +276,11 @@ CREATE OR REPLACE PACKAGE BODY ReservasPkg AS
         COMMIT;
     END eliminar_reserva;
 END ReservasPkg;
+/
 
 CREATE OR REPLACE PACKAGE BODY SesionesPkg AS
-    FUNCTION calcular_butacas_libres(id_sesion_in NUMBER)
-        RETURN NUMBER IS
+    FUNCTION calcular_butacas_libres(p_idSesion IN NUMBER) RETURN NUMBER
+    AS
         total_butacas NUMBER;
         butacas_reservadas NUMBER;
     BEGIN
@@ -265,14 +289,14 @@ CREATE OR REPLACE PACKAGE BODY SesionesPkg AS
         INTO total_butacas
         FROM Butacas b
                 JOIN Sesiones s ON b.NumeroSala = s.NumeroSala
-        WHERE s.idSesion = id_sesion_in;
+        WHERE s.idSesion = p_idSesion;
 
         -- Contar butacas ya reservadas para esa sesión
         SELECT COUNT(*)
         INTO butacas_reservadas
         FROM ButacasReservas br
                 JOIN Reservas r ON br.idReserva = r.idReserva
-        WHERE r.idSesion = id_sesion_in;
+        WHERE r.idSesion = p_idSesion;
 
         RETURN total_butacas - butacas_reservadas;
     END calcular_butacas_libres;
@@ -283,7 +307,7 @@ CREATE OR REPLACE PACKAGE BODY SesionesPkg AS
     BEGIN
         OPEN c_sesiones FOR
             SELECT idSesion, FechaHora FROM Sesiones
-            WHERE idPelicula = p_idPelicula AND calcular_butacas_libres(idSesion) > 0;
+            WHERE idPelicula = p_idPelicula AND SesionesPkg.calcular_butacas_libres(idSesion) > 0;
         RETURN c_sesiones;
     END sesiones_con_butacas_libres;
 
@@ -327,3 +351,6 @@ CREATE OR REPLACE PACKAGE BODY SesionesPkg AS
         COMMIT;
     END eliminar_todas_sesiones;
 END SesionesPkg;
+/
+
+COMMIT;

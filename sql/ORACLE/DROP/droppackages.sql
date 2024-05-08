@@ -1,0 +1,5 @@
+DROP PACKAGE ClientesPkg;
+DROP PACKAGE PeliculasPkg;
+DROP PACKAGE ReservasPkg;
+DROP PACKAGE SesionesPkg;
+COMMIT;

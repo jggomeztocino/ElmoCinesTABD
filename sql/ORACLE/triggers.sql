@@ -28,7 +28,7 @@ DECLARE
 BEGIN
     -- Verificar la disponibilidad de las butacas
     FOR i IN 1..:NEW.Entradas.COUNT LOOP
-            IF calcular_butacas_libres(:NEW.idSesion) = 0 THEN
+            IF SesionesPkg.calcular_butacas_libres(:NEW.idSesion) = 0 THEN
                 RAISE butaca_ocupada;
             END IF;
         END LOOP;
@@ -74,25 +74,6 @@ BEGIN
             WHERE idReserva = rec.idReserva;
         END LOOP;
 END;
-
--- Disparador para borrar el cliente si se repite el correo (Dejamos solo el registro actualizado: nueva inserción)
-CREATE OR REPLACE TRIGGER existe_cliente
-    BEFORE INSERT ON Clientes
-    FOR EACH ROW
-DECLARE
-    cliente_repetido EXCEPTION;
-BEGIN
-    IF (SELECT COUNT(*)
-        FROM Clientes
-        WHERE Correo = :NEW.Correo) > 0 THEN
-        RAISE cliente_repetido;
-    END IF;
-EXCEPTION
-    WHEN cliente_repetido THEN
-        -- Si el cliente ya existe, se actualiza su información
-        DELETE FROM Clientes
-        WHERE Correo = :NEW.Correo;
-END;
 /
 
 -- Disparador para, cuando se borra una película, borrar todas las sesiones, reservas y butacas asociadas
@@ -116,18 +97,32 @@ CREATE OR REPLACE TRIGGER borrar_menu
     BEFORE DELETE ON Menus
     FOR EACH ROW
 DECLARE
-    menu_por_defecto EXCEPTION;
+    default_menu EXCEPTION;
+    v_entradas TipoEntradaArray;
+    -- Las colecciones de objetos no pueden ser modificadas directamente, por lo que se crea esta variable auxiliar
 BEGIN
     IF :OLD.idMenu = 0 THEN
-        RAISE menu_por_defecto;
+        RAISE default_menu;
     ELSE
-        UPDATE Reservas
-        SET Entradas = TipoEntradaArray(TipoEntrada(0, 'Sin menú', 0))
-        WHERE EXISTS (SELECT 1
-                      FROM TABLE(Entradas) e
-                      WHERE e.idMenu = :OLD.idMenu);
+        FOR r IN (SELECT r.rowid AS rid, r.Entradas
+                  FROM Reservas r
+                  WHERE EXISTS (SELECT 1 FROM TABLE(r.Entradas) e WHERE e.idMenu = :OLD.idMenu))
+        LOOP
+            v_entradas := r.Entradas;
+            FOR i IN 1..v_entradas.COUNT LOOP
+                IF v_entradas(i).idMenu = :OLD.idMenu THEN
+                    v_entradas(i) := TipoEntrada(v_entradas(i).idEntrada, 'Sin menú', 0, 0);
+                END IF;
+            END LOOP;
+            -- Actualizar la reserva con el nuevo array de entradas modificado
+            UPDATE Reservas SET Entradas = v_entradas WHERE rowid = r.rid;
+        END LOOP;
     END IF;
 EXCEPTION
-    WHEN menu_por_defecto THEN
+    WHEN default_menu THEN
         RAISE_APPLICATION_ERROR(-20003, 'No se puede borrar el menú por defecto.');
 END;
+/
+
+
+COMMIT;
