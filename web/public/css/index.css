@@ -1,0 +1,95 @@
+:root {
+    --color-fondo-principal: #61141b;
+    --color-secundario: #31090b;
+    --color-texto: white;
+}
+
+/* Estilos para la sección principal (main) */
+/* Hero es el nombre que le da Bootstrap a la sección principal de una página web */
+.hero {
+    background: black;
+    background-size: cover;
+    background-image: url('https://i.imgur.com/QIgKJb2.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    padding-bottom: 450px;
+    padding-top: 20px;
+}
+
+.text-hero-left {
+    text-align: left;
+    margin-top: 50px;
+}
+
+.text-hero-right {
+    text-align: right;
+    margin-top: 50px;
+}
+
+.text-hero-right h1 {
+    font-size: 3.5rem;
+    line-height: 1.2;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.text-hero-right p {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.btn-custom {
+    background-color: var(--color-fondo-principal);
+    color: var(--color-texto);
+    border: none;
+    transition: background-color 0.1s ease;
+    border-radius: 40px;
+    padding: 15px 30px;
+    font-size: 20px;
+}
+
+.btn-custom:hover {
+    background-color: var(--color-secundario);
+    color: var(--color-texto);
+    border-radius: 40px;
+    padding: 15px 30px;
+    font-size: 20px;
+}
+
+/* Estilos para el carrusel */
+aside {
+    color: var(--color-texto);
+    background-color: var(--color-secundario);
+    padding: 20px 20px;
+}
+
+.img-carrusel {
+    width: 100%;
+    height: 700px;
+    object-fit: cover; /* Asegura que la imagen cubra el espacio sin distorsionarse */
+}
+
+.carrusel{
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+/* Media query del hero para dispositivos de anchura menor a 767px */
+@media (max-width: 767px) {
+    .text-hero-right {
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .text-hero-left {
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .container .text-hero-right{
+        order: 1;
+    }
+    .container .text-hero-left{
+        order: 2;
+    }
+}

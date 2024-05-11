@@ -1,0 +1,109 @@
+:root {
+    --color-principal: #61141b;
+    --color-secundario: #31090b;
+    --color-terciario: #240101;
+    --color-texto: white;
+}
+
+/* Estilos para toda la página */
+body {
+    background-color: var(--color-secundario);
+    color: var(--color-texto);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex-grow: 1;
+}
+
+/* Sesiones */
+/* Estilo para el botón de comprar entradas */
+.btn-primary {
+    background-color: var(--color-principal);
+    border-color: var(--color-principal);
+    border-radius: 40px;
+    padding: 10px 25px;
+    font-size: 20px;
+    margin-top: 5px;
+}
+
+.btn-primary:hover {
+    background-color: var(--color-terciario);
+    border-color: var(--color-terciario);
+    border-radius: 40px;
+    padding: 10px 25px;
+    font-size: 20px;
+    margin-top: 5px;
+}
+
+/* Estilo para la información de la película */
+
+#infoPelicula{
+    margin-top: 50px;
+}
+
+#infoPelicula h3{
+    margin-bottom: 15px;
+}
+
+.reproductor {
+    margin-top: 50px;
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+}
+
+.reproductor iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.titulo-seccion {
+    width:100%; 
+    text-align:center; 
+    border-bottom: 1px solid white; 
+    line-height:0.1em; 
+    margin:10px 0 20px; 
+} 
+
+
+.titulo-seccion span {
+    padding:0 10px; 
+    color:white; 
+    background-color: var(--color-secundario);
+}
+
+
+@media (max-width: 767px) {
+    .info {
+        margin-top: 20px;
+    }
+
+    .trailer {
+        margin-top: 20px;
+    }
+}
+
+#labelFechas {
+    margin-bottom: 10px;
+}
+
+@media (max-width: 767px) {
+    #sesionesPelicula {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+    #bloqueEntradas {
+        margin-top: 50px;
+    }
+}
+

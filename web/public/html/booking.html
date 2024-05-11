@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <title>ElmoCines</title>
+        <!-- Etiquetas metadatos -->
+        <meta name="keywords" content="cine, película, películas, cartelera, entradas, entretenimiento, cultura">
+        <meta name="description" content="ElmoCines - Cine premium">
+        <meta name="subject" content="Cartelera de cine y venta de entradas">
+        <meta name="copyright" content="ElmoCines">
+        <meta name="author" content="Jesús Gómez Tocino, jesus.gomeztocino@alum.uca.es">
+        <meta name="designer" content="Jesús Gómez Tocino, jesus.gomeztocino@alum.uca.es">
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/png" href="https://i.imgur.com/3S57Ic6.png">
+
+        <!-- Bootstrap CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+        <!-- Hoja de estilos general -->
+        <link href="/css/booking.css" rel="stylesheet">
+
+        <!-- Hoja de estilos Header & Footer -->
+        <link href="/css/headerfooterv2.css" rel="stylesheet">
+    </head>
+
+    <body>
+    <!-- Header / Menú principal -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">
+                    <img src="https://i.imgur.com/1eNd62I.png" alt="Logotipo" class="img-fluid">
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.html">INICIO</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="billboard.html">CARTELERA</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="equipment.html">NUESTRAS SALAS</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="menu.html">PRECIOS Y MENÚS</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="location.html">¿CÓMO LLEGAR?</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class = 'container my-5 containerbody'>
+            <div class = 'row'>
+                <h1 class = "titulo-seccion pb-3">
+                    RESERVA DE ENTRADAS:
+                </h1>
+            </div>
+            <div class = 'row mb-5 justify-content-between mt-3'>
+                <div class = 'col-12 col-lg-5'>
+                    <form class = 'datos-compra'>
+                        <div class = 'field'>
+                            <h4>
+                                Nombre y apellidos del comprador
+                            </h4>
+                            <label>
+                                <input type = 'text' id = 'nombre' class = 'form-control' placeholder = 'Introduce tu nombre aquí' required>
+                            </label>
+                        </div>
+                        <div class = 'field'>
+                            <h4>
+                                Correo electrónico *
+                            </h4>
+                            <label>
+                                <input type = 'email' id = 'correo' class = 'form-control' placeholder = 'Introduce tu correo electrónico aquí' required>
+                            </label>
+                        </div>
+                        <div class = 'field'>
+                            <h4>
+                                Número de teléfono
+                            </h4>
+                            <label>
+                                <input type = 'tel' id = 'telefono' class = 'form-control' placeholder = 'Introduce tu número de teléfono aquí'>
+                            </label>
+                        </div>
+                        <div class = 'field age'>
+                            <h4>
+                                Número de espectadores menores de 18 años **
+                            </h4>
+                        </div>
+                    </form>
+                </div>
+                <div class = 'col-lg-5 resumenColu'>
+                    <div class = 'row resumen p-3 mb-3'>
+                        <h4>
+                            Fecha
+                        </h4>
+                        <p id = 'fecha'>
+                            Fecha de la sesión
+                        </p>
+                        <h4>
+                            Sesión
+                        </h4>
+                        <p id = 'sesion'>
+                            Hora de la sesión
+                        </p>
+                        <h4>
+                            Butacas seleccionadas
+                        </h4>
+                        <p id = 'butacas'>
+                            Butacas
+                        </p>
+                    </div>
+                    <div class = 'row'>
+                        <p>
+                            * Proporcione una dirección de correo válida, ya que deberá confirmar la compra de entradas en dicha dirección. En caso de no confirmar la compra, las entradas serán liberadas para su venta en un plazo de 1 hora.
+                        </p>
+                        <p>
+                            ** A la hora de acudir a la sala, se solicitará la documentación acreditativa de la edad de los menores de 18 años. En caso de no poder acreditar la edad, deberá abonar la diferencia de precio en taquilla.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class = 'row info py-4'>
+                <div class = 'col-md-4 col-12 mb-3 resumenContainer'>
+                    <h2 class = 'mb-3'>
+                        RESUMEN
+                    </h2>
+                    <div class = 'resumenCol'>
+
+                    </div>
+                </div>
+                <div class = 'col-md-4 col-12 mb-3 infoContainer'>
+                    <h2>
+                        INFORMACIÓN
+                    </h2>
+                    <div class = 'infoCol'>
+
+                    </div>
+                </div>
+                <div class = 'col-12 col-md-4 text-center justify-content-center d-flex flex-column confirmarContainer'>
+                    <div><h3 class="continuarCompra text-center">Revisa los datos antes de seguir con la compra</h3></div>
+                    <div><button class="btn" style="margin-top: 10px;">Continuar</button></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer / Pie de página -->
+    <footer class="footer-container text-white py-3">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 sitemap">
+                    <h5><strong>SITEMAP</strong></h5>
+                    <ul>
+                        <li><a href="index.html">Inicio</a></li>
+                        <li><a href="billboard.html">Cartelera</a></li>
+                        <li><a href="equipment.html">Nuestras salas</a></li>
+                        <li><a href="menu.html">Precios y menús</a></li>
+                        <li><a href="location.html">¿Cómo llegar?</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 text-center logo">
+                    <img src="https://i.imgur.com/1eNd62I.png" alt="Logo Elmo Cines" class="footer-logo">
+                </div>
+                <div class="col-md-4 contacto">
+                    <h5><strong>CONTACTO</strong></h5>
+                    <p>Elmo Cines ©</p>
+                    <p><a href="mailto:info@elmocines.es">info@elmocines.es</a></p>
+                    <p>Avda. Universidad de Cádiz,<br>Campus Pto. Real, n.º 10, 11519</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="/js/booking.js"></script>
+    </body>
+</html>

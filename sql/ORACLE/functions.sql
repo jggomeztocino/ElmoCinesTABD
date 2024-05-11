@@ -16,7 +16,7 @@ AS
     c_peliculas SYS_REFCURSOR;
 BEGIN
     OPEN c_peliculas FOR
-        SELECT Titulo, UrlCover FROM Peliculas;
+        SELECT idPelicula, Titulo, UrlCover FROM Peliculas;
     RETURN c_peliculas;
 END;
 /

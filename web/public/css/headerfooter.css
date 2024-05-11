@@ -1,0 +1,94 @@
+/* Estilo general del menú */
+.navbar {
+    background-color: #61141b
+}
+
+/* Estilo del logo */
+.navbar-brand img {
+    height: auto;
+    width: auto;
+    max-height: 50px; /* Ajusta esto según el tamaño de tu logo */
+}
+
+/* Estilo de los elementos del menú para pantalla grande */
+@media (min-width: 992px) { /* Bootstrap breakpoint para dispositivos grandes */
+    .navbar-nav .nav-item {
+        margin-right: 4rem; /* Ajusta el espaciado según tus necesidades */
+    }
+
+    .navbar-nav .nav-item:last-child {
+        margin-right: 0;
+    }
+
+    .navbar-nav .nav-link {
+        color: white; /* Color del texto */
+    }
+}
+
+/* FOOTER */
+.sitemap, .contacto{
+    margin-top: 10px;
+}
+
+.footer-container {
+    background-color: #61141b;
+}
+
+.footer-container ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.footer-container ul li a {
+    color: white;
+    text-decoration: none;
+    transition: text-decoration 0.3s;
+}
+
+.footer-container ul li a:hover {
+    text-decoration: underline;
+}
+
+.footer-logo {
+    width: auto;
+    height: auto;
+    max-height: 40%;
+}
+
+.logo{
+    display: flex;
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center; /* Centra verticalmente */
+}
+
+/* Estilos de contacto */
+.contacto {
+    text-align: right;
+}
+
+.contacto p, .contacto a {
+    margin: 0;
+    line-height: 1.5;
+    color: white;
+    text-decoration: none;
+}
+
+.contacto a:hover {
+    text-decoration: underline;
+}
+
+/* Media queries para dispositivos pequeños */
+@media (max-width: 767px) {
+    .sitemap, .contacto {
+        text-align: center;
+    }
+
+    .sitemap h5, .contacto h5 {
+        border-bottom: none;
+    }
+
+    .footer-logo {
+        margin-bottom: 20px;
+    }
+}
+

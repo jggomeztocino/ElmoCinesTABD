@@ -1,0 +1,150 @@
+:root {
+    --color-principal: #61141b;
+    --color-secundario: #31090b;
+    --color-terciario: #240101;
+    --color-texto: white;
+}
+
+body {
+    background-color: var(--color-secundario);
+    color: var(--color-texto);
+    border-radius: 5px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main{
+    padding-left: 100px;
+    padding-right: 100px;
+}
+
+
+.section{
+    margin-top: 50px;
+    font-size: 30px;
+    padding-left: 200px;
+    padding-right: 200px;
+    text-align: center;
+}
+
+.section2, .section3{
+    padding: 25px;
+    padding-left: 100px;
+    padding-right: 100px;
+    color: white;
+    width: 100%;
+    margin-top: 50px;
+}
+
+.section2 h2{
+    font-size: 50px;
+    align-items: flex-start;
+}
+
+.section3 h2 {
+    font-size: 50px;
+    text-align: end;
+}
+
+.section2 .subsection2 , .section3 .subsection3{
+    width: 100%;
+    font-size: 23px;
+    display: flex;
+}
+
+.section2 .subsection2 .text2{
+    padding-right: 200px;
+}
+
+.section3 .subsection3 .text3{
+    text-align: end;
+    padding-left: 200px;
+}
+
+.section3 .subsection3 .text4{
+    text-align: end;
+    padding-left: 100px;
+}
+
+.section2 img, .section3 img {
+    width: auto;
+    max-width: 550px;
+    height: 350px;
+}
+
+.tabla-accesibilidad {
+    background-color: #61141b;
+    border-collapse: collapse;
+    font-size: 20px;
+    width: 100%;
+}
+
+.tabla-accesibilidad td{
+    border: 3px solid #240101;
+    padding: 8px;
+}
+
+.tabla-accesibilidad td:first-child {
+    width: 210px;
+}
+
+@media (max-width: 767px) {
+    main{
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .section{
+        margin-top: 50px;
+        font-size: 20px;
+        padding-left: 10px;
+        padding-right: 10px;
+        text-align: center;
+    }
+
+    .section2, .section3{
+        padding: 20px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .section2 h2, .section3 h2{
+        font-size: 45px;
+        text-align: center;
+    }
+
+    .section2 .subsection2 , .section3 .subsection3{
+        font-size: 20px;
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .section2 .subsection2 .text2, .section3 .subsection3 .text3, .section3 .subsection3 .text4{
+        padding-right: 0;
+        padding-left: 0;
+        text-align: justify;
+        hyphens: auto;
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .section2 img, .section3 img {
+        width: 350px;
+        max-width: 550px;
+        height: auto;
+    }
+
+    .subsection3.text3, .subsection3.text4{
+        order: 1;
+    }
+    .subsection3 img{
+        order: 2;
+    }
+
+    .subsection3 table{
+        order: 2;
+    }
+
+}

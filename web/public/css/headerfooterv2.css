@@ -1,0 +1,101 @@
+/* Estilo general */
+:root {
+    --color-principal: #61141b;
+    --color-texto: white;
+}
+
+.navbar, .footer-container {
+    background-color: var(--color-principal);
+}
+
+.navbar-brand img, .footer-logo {
+    height: auto;
+    width: auto;
+    max-height: 50px;
+}
+
+/* Estilo del menú para pantallas grandes */
+@media (min-width: 992px) {
+    .navbar-nav .nav-item {
+        margin-right: 4rem;
+    }
+
+    .navbar-nav .nav-item:last-child {
+        margin-right: 0;
+    }
+
+    .navbar-nav .nav-link {
+        color: var(--color-texto);
+    }
+}
+
+/* Estilos comunes para sitemap y contacto */
+.sitemap, .contacto {
+    margin-top: 10px;
+}
+
+.footer-container ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.footer-container ul li a {
+    color: var(--color-texto);
+    text-decoration: none;
+    transition: text-decoration 0.3s;
+}
+
+.footer-container ul li a:hover {
+    text-decoration: underline;
+}
+
+.logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Estilos específicos de contacto */
+.contacto {
+    text-align: right;
+    color: var(--color-texto);
+}
+
+.contacto p, .contacto a {
+    margin: 0;
+    line-height: 1.5;
+    text-decoration: none;
+    color: var(--color-texto);
+}
+
+.contacto a:hover {
+    text-decoration: underline;
+}
+
+/* Media queries para dispositivos pequeños */
+@media (max-width: 767px) {
+    .sitemap, .contacto {
+        text-align: center;
+    }
+
+    .sitemap h5, .contacto h5 {
+        border-bottom: none;
+    }
+
+    .footer-logo {
+        margin-bottom: 20px;
+        margin-top: 20px;
+    }
+
+    .container .logo{
+        order: 1;
+    }
+
+    .container .sitemap{
+        order: 2;
+    }
+
+    .container .contacto{
+        order: 3;
+    }
+}

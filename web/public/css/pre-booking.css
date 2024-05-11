@@ -1,0 +1,119 @@
+:root {
+    --color-principal: #61141b;
+    --color-secundario: #31090b;
+    --color-terciario: #240101;
+    --color-auxiliar: #FFCCCC;
+    --color-seleccionado: #d61d04;
+    --color-texto: white;
+}
+
+body {
+    background-color: var(--color-secundario);
+    color: var(--color-texto);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.formulario, .mapaButacas {
+    display: flex;
+    flex-direction: column;
+}
+
+.formulario {
+    margin-top: 20px;
+}
+
+.mapaButacas {
+    background-color: white;
+    align-items: center;
+    justify-content: center;
+}
+
+.pantalla {
+    width: 100%;
+    text-align: center;
+    background-color: var(--color-principal);
+    color: var(--color-texto);
+    padding: 10px;
+    margin: 20px 0;
+}
+
+.asiento {
+    width: 40px;
+    height: 40px;
+    margin: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.asiento.libre {
+    background-color: var(--color-auxiliar);
+    cursor: pointer;
+    color: black;
+}
+
+.asiento.ocupado {
+    background-color: var(--color-terciario);
+    cursor: not-allowed;
+}
+
+.asiento.seleccionado {
+    background-color: var(--color-seleccionado);
+    cursor: pointer;
+}
+
+.leyenda {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.leyenda div {
+    margin: 0 10px;
+    display: flex;
+    align-items: center;
+}
+
+.leyenda .color {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+}
+
+.btn {
+    background-color: var(--color-principal);
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 40px;
+    text-transform: uppercase;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 20px;
+}
+
+.btn:hover {
+    background-color: var(--color-terciario);
+    color: white;
+}
+
+@media (max-width: 767px) {
+    .customContainer .formulario {
+        order: 1;
+    }
+
+    .customContainer .mapaButacas, .mapaButacas {
+        order: 2;
+        justify-content: center;
+    }
+}
