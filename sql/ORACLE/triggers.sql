@@ -19,22 +19,37 @@ BEGIN
 END;
 /
 
--- Disparador para verificar la disponibilidad de butacas antes de registrar una reserva
+
+-- Disparador para garantizar que una butaca no se reserve más de una vez para la misma sesión
 CREATE OR REPLACE TRIGGER disponibilidad_butacas
-    BEFORE INSERT ON Reservas
+    BEFORE INSERT ON ButacasReservas
     FOR EACH ROW
 DECLARE
     butaca_ocupada EXCEPTION;
+    contador NUMBER;
+    id_sesion_actual NUMBER;
 BEGIN
-    -- Verificar la disponibilidad de las butacas
-    FOR i IN 1..:NEW.Entradas.COUNT LOOP
-            IF SesionesPkg.calcular_butacas_libres(:NEW.idSesion) = 0 THEN
-                RAISE butaca_ocupada;
-            END IF;
-        END LOOP;
+    -- Obtener idSesion de la reserva actual
+    SELECT idSesion INTO id_sesion_actual FROM Reservas WHERE idReserva = :NEW.idReserva;
+    
+    -- Contar si existe alguna reserva con la misma butaca y sesión
+    SELECT COUNT(*)
+    INTO contador
+    FROM ButacasReservas br
+    JOIN Reservas r ON br.idReserva = r.idReserva
+    WHERE br.idButaca = :NEW.idButaca
+      AND br.NumeroSala = :NEW.NumeroSala
+      AND r.idSesion = id_sesion_actual;
+
+    -- Si el contador es mayor que 0, entonces la butaca ya está ocupada
+    IF contador > 0 THEN
+        RAISE butaca_ocupada;
+    END IF;
 EXCEPTION
     WHEN butaca_ocupada THEN
-        RAISE_APPLICATION_ERROR(-20002, 'Butaca no disponible.');
+        -- Informar del error y revertir la inserción
+        DELETE FROM Reservas WHERE idReserva = :NEW.idReserva;        
+        RAISE_APPLICATION_ERROR(-20002, 'La butaca ' || TO_CHAR(:NEW.idButaca) || ' en la sala ' || TO_CHAR(:NEW.NumeroSala) || ' ya está ocupada para la sesión ' || TO_CHAR(id_sesion_actual));
 END;
 /
 

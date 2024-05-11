@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const { movie, sesion, butacas } = obtenerParametrosURL();
+
     let butacasArray = butacas ? butacas.split(',') : [];
 
     // Si se han pasado los parámetros necesarios, se procede a cargar la información de la película y la sesión
@@ -31,8 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 let correo = document.querySelector('#correo').value;
                 let nombreCompleto = document.querySelector('#nombre').value;
                 let telefono = document.querySelector('#telefono').value;
-                let sesionv2 = sesion.split('-')[0] + '' + sesion.split('-')[1];
-                let reservaId = `${movie}-${correo}-${sesionv2}`;
 
                 const menusTexto = ['nada', 'betterTogether', 'grande', 'mediano', 'infantil'];
                 let menusSeleccionados = [];
@@ -46,27 +45,68 @@ document.addEventListener('DOMContentLoaded', () => {
                 let entradasAdultos = butacasArray.length - document.querySelector('#menoresDesplegable').value;
                 let entradasMenores = parseInt(document.querySelector('#menoresDesplegable').value);
 
-                // Verificar de nuevo la disponibilidad de las butacas antes de realizar la reserva
-                verificarButacasDisponibles(movie, sesion, butacas.split(','))
-                    .then(disponibles => {
-                        if (disponibles) {
-                            actualizarUsuario(correo, nombreCompleto, telefono, reservaId, butacasArray, menusSeleccionados, entradasAdultos, entradasMenores)
-                                .then(() => actualizarSesion(movie, sesion, butacasArray, correo))
-                                .then(() => window.location.href = 'thankyou.html')
-                                .catch(error => console.error('Error al actualizar usuario o sesión', error));
-                        } else {
-                            alert('Alguna de las butacas seleccionadas ya ha sido reservada.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        alert('Ocurrió un error al verificar la disponibilidad de las butacas.');
-                    });
-            } else {
-                alert('Por favor, corrija los datos introducidos :(');
-            }
-        });
+                let nuevoUsuario = {
+                    correo: correo,
+                    nombre: nombreCompleto,
+                    telefono: telefono,
+                }
 
+                // 1. Invocar la función verificarButacasDisponibles
+                // 1. Insertar Cliente con InsertOrUpdateCliente(Correo, Nombre, Telefono)
+                // 2. Insertar Reserva con ReservasPkg.realizar_reserva(Sesion, Sala, Correo, Nombre, Telefono, Entradas, Butacas)
+                // 2.1. Entradas a su vez es una estructura, con atributos idEntrada, idMenu, Descripcion y Precio
+                // Nota: Los menús se enumeran del 0 al 4, siendo 0 el menú sin seleccionar
+                // Por tanto, debe estructurarse de la siguiente manera, adaptándose a Oracle:
+                // TipoEntradaArray(TipoEntrada(secuencia_idEntrada.NEXTVAL, 0, 'Entrada adulta', 6), TipoEntrada(secuencia_idEntrada.NEXTVAL, 1, 'Entrada infantil', 4), ...)
+                // Con tantos TipoEntrada como entradas haya
+                // 2.2. Butacas es un VARRAY de Butaca, que tendrá hasta 5 butacas, que deberán ser transformados inversamente de A1, A2, A3, A4, A5 a 1, 2, 3, 4, 5...
+                verificarButacasDisponibles(movie, sesion, butacasArray)
+                    .then(disponibles => {
+                        fetch(`/users`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(nuevoUsuario)
+                        });
+        
+                        let idSesion;
+                        // Obtener el idSesion desde /sessions/:movieId/:idPelicula/:FechaHora' (únicamente devuelve idSesion) y convertirlo a int
+                        fetch(`/sessions/${movie}/${sesion}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                idSesion = parseInt(data.idSesion);
+                            })
+                            .catch(error => mensajeError('Error al obtener el id de la sesión', error));
+        
+                            
+                        // realizar_reserva(idSesion, Sala, Correo, Nombre, Telefono, Entradas, Butacas)
+                        fetch(`/booking`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(
+                                {
+                                    idSesion: idSesion,
+                                    sala: 1,
+                                    correo: correo,
+                                    nombre: nombreCompleto,
+                                    telefono: telefono,
+                                    entradas: {
+                                        adultas: entradasAdultos,
+                                        menores: entradasMenores,
+                                        menus: menusSeleccionados
+                                    },
+                                    butacas: butacasArray.map(butaca => 
+                                        {
+                                            let fila = butaca.charCodeAt(0) - 65;
+                                            let columna = parseInt(butaca[1]);
+                                            return fila * 5 + columna;
+                                        }
+                                    )
+                                }
+                            )
+                        });
+                    })
+                }
+            });
         // Listeners para comprobar la validez de los campos de texto
         document.querySelector('#nombre').addEventListener('input', actualizarInfo);
         document.querySelector('#correo').addEventListener('input', actualizarInfo);
@@ -75,78 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
         mensajeError('Error de parametrización. \nNo introduzca la URL manualmente >:(', 'URL introducida manualmente');
     }
 });
-
-// Funciones auxiliares
-function actualizarUsuario(correo, nombreCompleto, telefono, reservaId, butacasArray, menusSeleccionados, entradasAdultos, entradasMenores) {
-    return fetch(`/users/${correo}`)
-        .then(response => {
-            if (response.ok) return response.json();
-            else throw new Error('Usuario no encontrado, se creará uno nuevo.');
-        })
-        .then(usuario => {
-            usuario.n_bookings = usuario.n_bookings ? usuario.n_bookings + 1 : 1;
-            usuario.bookings = usuario.bookings ? usuario.bookings : [];
-            usuario.bookings.push({
-                booking_id: reservaId,
-                adults: entradasAdultos,
-                children: entradasMenores,
-                seats: butacasArray,
-                menus: menusSeleccionados,
-                total: parseInt(document.querySelector('#total').textContent.split(' ')[1])
-            });
-            return fetch(`/users/${correo}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(usuario)
-            });
-        })
-        .catch(() => {
-            let nuevoUsuario = {
-                _id: correo,
-                name: nombreCompleto,
-                phone: telefono,
-                n_bookings: 1,
-                bookings: [{
-                    booking_id: reservaId,
-                    adults: entradasAdultos,
-                    children: entradasMenores,
-                    seats: butacasArray,
-                    menus: menusSeleccionados,
-                    total: parseInt(document.querySelector('#total').textContent.split(' ')[1])
-                }]
-            };
-            return fetch(`/users`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(nuevoUsuario)
-            });
-        });
-}
-
-// Actualiza la sesión con las butacas ocupadas y el correo del usuario
-function actualizarSesion(movie, sesion, butacasArray, correo) {
-    return fetch(`/sessions/${movie}/${sesion}`)
-        .then(response => response.json())
-        .then(sesionData => {
-            // Decrementa butacas_libres por el número de butacas a ocupar, teniendo en cuenta cuando es 0 se establezca 0 y no null
-            sesionData.butacas_libres -= butacasArray.length;
-            sesionData.butacas_detalles.forEach(butaca => {
-                if (butacasArray.includes(butaca.numero)) {
-                    butaca.estado = 'ocupado';
-                    butaca.email = correo;
-                }
-            });
-            // Incluye butacas_libres en el cuerpo de la solicitud PUT
-            return fetch(`/sessions/${movie}/${sesion}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    butacas_libres: sesionData.butacas_libres, // Asegúrate de que este valor sea el correcto para tu servidor
-                    butacas_detalles: sesionData.butacas_detalles
-                })
-            });
-        });
-}
 
 // Obtiene los parámetros de la URL
 function obtenerParametrosURL() {
@@ -160,14 +128,16 @@ function obtenerParametrosURL() {
 
 // Formatea la fecha y la hora de la sesión
 function formatearFecha(sesion) {
-    const fecha = sesion.split('-')[0];
-    return `${fecha.substring(0, 4)}-${fecha.substring(4, 6)}-${fecha.substring(6, 8)}`;
+    const fecha = new Date(sesion.split('T')[0]);
+    const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
+        'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    return `${fecha.getDate()} de ${meses[fecha.getMonth()]} de ${fecha.getFullYear()}`;
 }
 
 // Formatea la hora de la sesión
 function formatearHora(sesion) {
-    const hora = sesion.split('-')[1];
-    return `${hora.substring(0, 2)}:${hora.substring(2, 4)}`;
+    const hora = new Date(sesion).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    return hora.substring(0, 5); // Selecciona solo la hora y los minutos, sin los segundos
 }
 
 // Actualiza la información de la sesión en la página
@@ -182,7 +152,7 @@ function cargarInformacionPelicula(movie) {
     fetch(`/billboard/${movie}`)
         .then(response => response.json())
         .then(data => {
-            document.querySelector('.titulo-seccion').textContent = 'RESERVA DE ENTRADAS: ' + data.title;
+            document.querySelector('.titulo-seccion').textContent = 'RESERVA DE ENTRADAS: ' + data.Titulo;
         })
         .catch(error => mensajeError('Error al cargar la información de la sesión', error));
 }

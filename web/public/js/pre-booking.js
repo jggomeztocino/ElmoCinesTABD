@@ -2,7 +2,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const movie = urlParams.get('movie');
-    let fecha;
     let sesion;
     const today = new Date().toISOString().split('T')[0];
     let butacasSeleccionadas = [];
@@ -13,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 // Actualiza el contenido de la página con el título de la película
-                document.querySelector('.movieTitle').textContent = data.titulo;
+                document.querySelector('.movieTitle').textContent = data.title;
             })
             .catch(error => {
                 mensajeError('Error al cargar la información de la película: ' + error.message);
@@ -27,112 +26,104 @@ document.addEventListener('DOMContentLoaded', function() {
     // Función para cargar y mostrar las fechas de las sesiones disponibles para la película seleccionada
     function loadSessionDates(movie) {
         fetch(`/sessions/${movie}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Respuesta de red no fue ok');
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(sesiones => {
-                const fechas = sesiones.map(sesion => new Date(sesion.fechaHora).toISOString().split('T')[0]);
-    
+                const today = new Date().toISOString().slice(0, 10);
+                // Filtra las fechas de las sesiones que sean posteriores a hoy y que tengan butacas disponibles
+                const fechas =
+                    sesiones.filter(sesion => sesion.FechaHora.slice(0, 10) >= today && sesion.ButacasLibres > 0)
+                        .map(sesion => sesion.FechaHora);
+
+                // Verifica si hay fechas disponibles para las sesiones
                 if (fechas.length === 0) {
                     mensajeError('No hay sesiones disponibles para la película seleccionada.');
                     return;
                 }
-    
+
+                // Preparar la identificación de la sesión para las operaciones posteriores
+                sesion = fechas[0];
+
                 const formulario = document.querySelector('.formulario');
                 formulario.innerHTML = ''; // Limpiamos el formulario
-    
+
                 // Selector de fecha
                 const tituloFecha = document.createElement('h4');
                 tituloFecha.textContent = 'Fecha de la sesión:';
                 formulario.appendChild(tituloFecha);
-    
+
                 const selectorFecha = document.createElement('select');
                 selectorFecha.style.marginBottom = '20px';
                 selectorFecha.classList.add('form-select');
                 formulario.appendChild(selectorFecha);
-    
-                // Usamos un Set para eliminar fechas duplicadas
-                [...new Set(fechas)].forEach(fecha => {
+
+                [...new Set(fechas.map(fecha => fecha.slice(0, 10)))].forEach(fecha => {
                     const option = document.createElement('option');
                     option.value = fecha;
-                    option.textContent = fecha; // Formatear fecha para mostrarla de manera amigable si necesario
+                    option.textContent = fecha;
                     selectorFecha.appendChild(option);
                 });
-    
+
                 selectorFecha.addEventListener('change', (event) => {
                     const fechaSeleccionada = event.target.value;
+                    sesion = sesiones.find(sesion => sesion.FechaHora.slice(0, 10) === fechaSeleccionada).idSesion;
                     loadSessionTimes(movie, fechaSeleccionada, sesiones);
                 });
-    
+
                 // Carga las horas de las sesiones para la primera fecha disponible
-                loadSessionTimes(movie, fechas[0], sesiones);
+                loadSessionTimes(movie, fechas[0].slice(0, 10), sesiones);
             })
             .catch(error => {
                 mensajeError('Error al cargar las fechas de las sesiones: ' + error.message);
             });
     }
-    
 
     // Función para cargar y mostrar las horas disponibles para las sesiones de una fecha seleccionada.
     function loadSessionTimes(movie, fechaSeleccionada, sesiones) {
+        const sesionesDelDia = sesiones.filter(sesion => sesion.FechaHora.slice(0, 10) === fechaSeleccionada);
         const formulario = document.querySelector('.formulario');
-        if (!formulario) {
-            console.error('El elemento del formulario no existe en el DOM');
-            return;
-        }
-    
-        const sesionesDelDia = sesiones.filter(sesion => new Date(sesion.fechaHora).toISOString().split('T')[0] === fechaSeleccionada);
-        
-        // Limpia previamente cualquier selector de hora existente
-        const selectorPrevio = document.querySelector('.selectorHora');
+
+        // Time selector
         const tituloPrevio = document.querySelector('.tituloHora');
-        if (selectorPrevio) selectorPrevio.remove();
-        if (tituloPrevio) tituloPrevio.remove();
-    
-        // Crea un nuevo título y selector para la hora de la sesión
+        if (tituloPrevio) {
+            tituloPrevio.remove();
+        }
         const tituloHora = document.createElement('h4');
         tituloHora.textContent = 'Hora de la sesión:';
         tituloHora.classList.add('tituloHora');
         formulario.appendChild(tituloHora);
-    
+
+        const selectorPrevio = document.querySelector('.selectorHora');
+        if (selectorPrevio) {
+            selectorPrevio.remove();
+        }
         const selectorHora = document.createElement('select');
         selectorHora.style.marginBottom = '20px';
-        selectorHora.classList.add('form-select', 'selectorHora');
+        selectorHora.classList.add('form-select');
+        selectorHora.classList.add('selectorHora');
         formulario.appendChild(selectorHora);
-    
-        sesionesDelDia.forEach(sesion => {
-            const hora = new Date(sesion.fechaHora).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-            if (sesion.butacasLibres > 0) {
+
+        // Agrega las opciones de hora al selector
+        sesionesDelDia.forEach((sesion) => {
+            if (sesion.ButacasLibres > 0) {
                 const option = document.createElement('option');
-                option.value = sesion.fechaHora;
-                option.textContent = hora;
+                option.value = sesion.FechaHora;
+                option.textContent = new Date(sesion.FechaHora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 selectorHora.appendChild(option);
             }
         });
-    
+
         selectorHora.addEventListener('change', (event) => {
-            const fechaHoraSeleccionada = event.target.value;
-            const sesionSeleccionada = sesiones.find(sesion => sesion.fechaHora === fechaHoraSeleccionada);
-            if (sesionSeleccionada && sesionSeleccionada.butacasDetalles) {
-                mostrarMapaDeAsientos(sesionSeleccionada.butacasDetalles);
-            }
+            const horaSeleccionada = event.target.value;
+            sesion = horaSeleccionada;
+            const sesionSeleccionada = sesionesDelDia.find(sesion => sesion.FechaHora === horaSeleccionada);
+            mostrarMapaDeAsientos(sesionSeleccionada.butacas_detalles);
         });
-    
-        // Carga automáticamente los detalles de la primera sesión disponible
-        if (sesionesDelDia.length > 0 && sesionesDelDia[0].butacasDetalles) {
-            mostrarMapaDeAsientos(sesionesDelDia[0].butacasDetalles);
-        } else {
-            formulario.append('No hay sesiones disponibles a esta hora.');
+
+        // Muestra el mapa de asientos para la primera hora disponible
+        if (sesionesDelDia.length > 0) {
+            mostrarMapaDeAsientos(sesionesDelDia[0].butacas_detalles);
         }
     }
-    
-
-// Esta función asume que la estructura de datos incluye `butacasDetalles` que es un array de detalles de las butacas.
-// Asegúrate de adaptar esta parte a cómo realmente recibes y quieres procesar los datos de las butacas.
-
 
     // Función para mostrar el mapa de asientos y gestionar la selección de asientos por el usuario
     function mostrarMapaDeAsientos(butacas) {

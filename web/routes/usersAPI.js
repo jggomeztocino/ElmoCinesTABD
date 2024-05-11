@@ -9,6 +9,8 @@ const oracledb = require('oracledb');
 const router = express.Router();
 
 // Variables de entorno para la configuración
+const emailDir = process.env.EMAIL_DIR;
+const emailPass = process.env.EMAIL_PASS;
 
 // Cliente de MongoDB
 
@@ -31,13 +33,13 @@ const menusDiccionario = {
 };
 
 // Configuración de la conexión de nodemailer con Gmail
-/*const transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: emailDir,
         pass: emailPass
     }
-});*/
+});
 
 // Middleware para parsear el cuerpo de las solicitudes a JSON
 router.use(express.json());
@@ -120,115 +122,174 @@ async function sendEmail(to, subject, html) {
     }
 }
 
-// Ruta GET para obtener todos los usuarios
-router.get('/', async (req, res) => {
+async function openConnection() {
     try {
-        await client.connect();
-        const db = client.db(dbName);
-        const users = await db.collection('users').find({}).toArray();
-        res.json(users);
+        return await oracledb.getConnection({
+            user: process.env.ORACLE_USER,
+            password: process.env.ORACLE_PASSWORD,
+            connectionString: process.env.ORACLE_CONNECTION_STRING
+        });
+    } catch (err) {
+        console.error('Error al conectarse a Oracle', err);
+    }
+}
+
+router.get('/', async (req, res) => {
+    let connection;
+    try {
+        connection = await openConnection();
+        const result = await connection.execute(`BEGIN :cursor := ClientesPkg.listar_clientes(); END;`, {
+            cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+        });
+        const resultSet = result.outBinds.cursor;
+        const rows = await resultSet.getRows(); // Fetch all rows
+        await resultSet.close();
+        res.json(rows);
     } catch (error) {
-        res.status(500).send('Error al obtener los usuarios: ' + error.message);
+        res.status(500).send('Error retrieving users: ' + error.message);
     } finally {
-        await client.close();
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
     }
 });
 
-// Ruta GET para obtener un usuario por ID
 router.get('/:id', async (req, res) => {
+    let connection;
     try {
         const userId = req.params.id;
-        await client.connect();
-        const db = client.db(dbName);
-        const user = await db.collection('users').findOne({ _id: userId });
-        if (user) {
-            res.json(user);
+        connection = await openConnection();
+        const result = await connection.execute(`BEGIN :cursor := ClientesPkg.listar_cliente(:id); END;`, {
+            id: userId,
+            cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+        });
+        const resultSet = result.outBinds.cursor;
+        const rows = await resultSet.getRows(); // Fetch all rows
+        await resultSet.close();
+        if (rows.length > 0) {
+            res.json(rows[0]);
         } else {
-            res.status(404).send('Usuario no encontrado');
+            res.status(404).send('User not found');
         }
     } catch (error) {
-        res.status(500).send('Error al obtener el usuario: ' + error.message);
+        res.status(500).send('Error retrieving user: ' + error.message);
     } finally {
-        await client.close();
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
     }
 });
 
-// Ruta POST para añadir un nuevo usuario
 router.post('/', async (req, res) => {
+    let connection;
     try {
         const newUser = req.body;
-        await client.connect();
-        const db = client.db(dbName);
-        const result = await db.collection('users').insertOne(newUser);
-        if (result.acknowledged) {
-            await sendEmail(newUser._id, '¡Bienvenido a ElmoCines!', enviarBienvenidaHTML(newUser));
-            await sendEmail(newUser._id, '¡Aquí tienes tus entradas! ElmoCines', reservaHTML(newUser));
-        }
-        res.status(201).send('Usuario añadido correctamente');
+        connection = await openConnection();
+        await connection.execute(`CALL ClientesPkg.InsertOrUpdateCliente(:email, :name, :phone)`, {
+            email: newUser.email,
+            name: newUser.name,
+            phone: newUser.phone
+        });
+        await connection.commit();
+        res.status(201).send('User added successfully');
     } catch (error) {
-        res.status(500).send('Error al añadir el usuario: ' + error.message);
+        res.status(500).send('Error adding user: ' + error.message);
     } finally {
-        await client.close();
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
     }
 });
 
-// Ruta PUT para actualizar un usuario
 router.put('/:id', async (req, res) => {
+    let connection;
     try {
         const userId = req.params.id;
         const updateData = req.body;
-        await client.connect();
-        const db = client.db(dbName);
-        const result = await db.collection('users').updateOne({ _id: userId }, { $set: updateData });
-
-        if (result.matchedCount === 0) {
-            res.status(404).send('Usuario no encontrado');
+        connection = await openConnection();
+        const sql = `CALL ClientesPkg.modificar_cliente(:email, :name, :phone)`;
+        const result = await connection.execute(sql, {
+            email: userId,
+            name: updateData.name,
+            phone: updateData.phone
+        });
+        if (result.rowsAffected === 0) {
+            res.status(404).send('User not found');
         } else {
-            await sendEmail(userId, '¡Aquí tienes tus entradas! ElmoCines', reservaHTML(updateData));
-            res.send('Usuario actualizado correctamente');
+            await connection.commit();
+            res.send('User updated successfully');
         }
     } catch (error) {
-        res.status(500).send('Error al actualizar el usuario: ' + error.message);
+        res.status(500).send('Error updating user: ' + error.message);
     } finally {
-        await client.close();
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
     }
 });
 
-// Ruta DELETE para eliminar un usuario por ID
 router.delete('/:id', async (req, res) => {
+    let connection;
     try {
         const userId = req.params.id;
-        await client.connect();
-        const db = client.db(dbName);
-        const result = await db.collection('users').deleteOne({ _id: userId });
-        if (result.deletedCount === 0) {
-            res.status(404).send('Usuario no encontrado');
+        connection = await openConnection();
+        const result = await connection.execute(`CALL ClientesPkg.eliminar_cliente(:email)`, {
+            email: userId
+        });
+        if (result.rowsAffected === 0) {
+            res.status(404).send('User not found');
         } else {
-            res.send('Usuario eliminado correctamente');
+            await connection.commit();
+            res.send('User deleted successfully');
         }
     } catch (error) {
-        res.status(500).send('Error al eliminar el usuario: ' + error.message);
+        res.status(500).send('Error deleting user: ' + error.message);
     } finally {
-        await client.close();
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
     }
 });
 
-// Ruta DELETE para eliminar todos los usuarios
 router.delete('/', async (req, res) => {
+    let connection;
     try {
-        await client.connect();
-        const db = client.db(dbName);
-        const result = await db.collection('users').deleteMany({});
-        if (result.deletedCount === 0) {
-            res.status(404).send('No se encontraron usuarios para eliminar.');
-        } else {
-            res.send(`Usuarios eliminados correctamente. Total: ${result.deletedCount}`);
-        }
+        connection = await openConnection();
+        await connection.execute(`CALL ClientesPkg.eliminar_todos_clientes()`);
+        await connection.commit();
+        res.send('All users deleted successfully');
     } catch (error) {
-        res.status(500).send('Error al eliminar los usuarios: ' + error.message);
+        res.status(500).send('Error deleting users: ' + error.message);
     } finally {
-        await client.close();
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
     }
 });
+
 
 module.exports = router;

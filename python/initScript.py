@@ -11,7 +11,7 @@ def generar_butacas(nButacas, sala):
 def generar_cliente(sql):
     nombre = names.get_full_name()
     email = f"{nombre.replace(' ', '.').lower()}@guest.elmocines.com"
-    telefono = f"6{random.randint(600000000, 699999999)}"
+    telefono = f"{random.randint(600000000, 699999999)}"
     cliente = {"Nombre": nombre, "Email": email, "Telefono": telefono}
     ##sql.append(f"INSERT INTO Clientes (Correo, Nombre, Telefono) VALUES ('{email}', '{nombre}', '{telefono}');")
     sql.append(f"EXECUTE ClientesPkg.InsertOrUpdateCliente('{email}', '{nombre}', '{telefono}');")

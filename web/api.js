@@ -11,6 +11,7 @@ const port = process.env.PORT || 3000;
 const billboard = require('./routes/billboardAPI');
 const sessions = require('./routes/sessionsAPI');
 const users = require('./routes/usersAPI');
+const booking = require('./routes/bookingAPI');
 
 app.use(express.json()); // Parsea los datos JSON y los almacena en req.body
 app.use(express.urlencoded({ extended: true })); // Parsea los datos de la URL y los almacena en req.body
@@ -22,6 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/billboard', billboard);
 app.use('/sessions', sessions);
 app.use('/users', users);
+app.use('/booking', booking);
 
 const server = http.createServer(app);
 

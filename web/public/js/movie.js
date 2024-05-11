@@ -36,23 +36,26 @@ function loadMovieInfo(movie) {
         });
 }
 
+// Función para cargar y mostrar las fechas de sesión disponibles para la película seleccionada
 async function loadSessionDates(movieId) {
     try {
         const response = await fetch(`/sessions/${movieId}`);
-        if (!response.ok) {
-            throw new Error('Respuesta de red no fue ok');
-        }
         const sesiones = await response.json();
 
-        // Extraer las fechas de las sesiones y usarlas para configurar el selector de fechas
-        const fechas = sesiones.map(sesion => new Date(sesion.fechaHora).toISOString().split('T')[0]);
-        const fechasUnicas = [...new Set(fechas)]; // Eliminar duplicados para obtener solo fechas únicas
+        // Extracting dates and ensuring uniqueness
+        const fechas = sesiones.map(sesion => sesion.FechaHora.split('T')[0]);
+        const fechasUnicas = [...new Set(fechas)];
+        
+        // Filtering available days
+        const diasDisponibles = fechasUnicas.filter(fecha => {
+            return sesiones.some(sesion => sesion.FechaHora.startsWith(fecha) && sesion.ButacasLibres > 0);
+        });
 
-        if (fechasUnicas.length === 0) {
+        // UI updates for no tickets available
+        if(diasDisponibles.length === 0) {
             document.getElementById('labelFechas').style.display = 'none';
             document.getElementById('selectorFecha').style.display = 'none';
             document.getElementById('bloqueEntradas').style.display = 'none';
-
             const mensajeNoDisponible = document.createElement('div');
             mensajeNoDisponible.innerHTML = "<h2 id='noticket' style='margin-top: 30px'>No quedan entradas para esta película... :(</h2>";
             mensajeNoDisponible.className = "text-center";
@@ -60,20 +63,20 @@ async function loadSessionDates(movieId) {
             return;
         }
 
-        // Configurar el selector de fechas con Flatpickr
+        // Setting up the date picker
         const hoy = new Date().toISOString().split('T')[0];
-        const defaultDate = fechasUnicas.find(fecha => fecha >= hoy) || hoy;
-
+        const defaultDate = diasDisponibles.find(fecha => fecha >= hoy) || hoy;
         flatpickr("#selectorFecha", {
             dateFormat: "Y-m-d",
             minDate: hoy,
             maxDate: fechasUnicas[fechasUnicas.length - 1],
             defaultDate: defaultDate,
-            enable: fechasUnicas,
+            enable: diasDisponibles,
+            disable: fechasUnicas.filter(fecha => !diasDisponibles.includes(fecha)),
             altInput: true,
             altFormat: "J \\de F \\de Y",
             locale: {
-                firstDayOfWeek: 1, // Asegúrate de que los settings locales están correctamente configurados
+                firstDayOfWeek: 1,
                 weekdays: {
                     shorthand: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
                     longhand: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
@@ -82,36 +85,46 @@ async function loadSessionDates(movieId) {
                     shorthand: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
                     longhand: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
                 },
-                ordinal: () => "" // Sufijo para el día del mes
-            }
+                ordinal: () => {
+                    return ""; // Sufijo para el día del mes
+                }
+            },
         });
 
-        // Mostrar sesiones por fecha seleccionada
+        // Event listener for selecting new date
         document.getElementById('selectorFecha').addEventListener('change', function() {
             const fechaSeleccionada = this.value;
-            mostrarSesionesPorFecha(sesiones.filter(sesion => new Date(sesion.fechaHora).toISOString().split('T')[0] === fechaSeleccionada));
+            mostrarSesionesPorFecha(sesiones.filter(sesion => sesion.FechaHora.startsWith(fechaSeleccionada)));
         });
 
-        mostrarSesionesPorFecha(sesiones.filter(sesion => new Date(sesion.fechaHora).toISOString().split('T')[0] === defaultDate));
+        // Show sessions for default date
+        mostrarSesionesPorFecha(sesiones.filter(sesion => sesion.FechaHora.startsWith(defaultDate)));
     } catch (error) {
         mensajeError('Error al cargar las sesiones', error);
     }
 }
 
-
+// Función para mostrar las sesiones disponibles de la película para una fecha seleccionada
 function mostrarSesionesPorFecha(sesionesFiltradas) {
     const contenedorSesiones = document.getElementById('sesionesPelicula');
     contenedorSesiones.innerHTML = '';
 
     if (sesionesFiltradas.length > 0) {
-        sesionesFiltradas.forEach(sesion => {
-            const fechaHora = new Date(sesion.fechaHora);
-            const hora = `${fechaHora.getHours()}:${fechaHora.getMinutes()}`;
+        sesionesFiltradas.forEach(({ FechaHora, NumeroSala, ButacasLibres }) => {
+            if (ButacasLibres === 0) return;
+            const hora = FechaHora.split('T')[1].slice(0, 5); // Extracting time in HH:MM format
             const div = document.createElement('div');
+            div.style.backgroundColor = 'var(--color-principal)';
+            div.style.marginRight = '20px';
+            div.style.marginTop = '20px';
+            div.style.padding = '15px';
+            div.style.borderRadius = '5px';
+            div.style.width = '190px';
+            div.classList.add('sesionIndividual');
             div.innerHTML = `
                 <p><strong>Hora:</strong> ${hora}</p>
-                <p><strong>Sala:</strong> ${sesion.sala}</p>
-                <p><strong>Butacas restantes:</strong> ${sesion.butacasLibres}</p>
+                <p><strong>Sala:</strong> ${NumeroSala}</p>
+                <p><strong>Butacas restantes:</strong> ${ButacasLibres}</p>
             `;
             contenedorSesiones.appendChild(div);
         });
