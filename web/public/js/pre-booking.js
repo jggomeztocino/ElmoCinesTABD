@@ -77,7 +77,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
 
     // Función para cargar y mostrar las horas disponibles para las sesiones de una fecha seleccionada.
-    // Función para cargar y mostrar las horas disponibles para las sesiones de una fecha seleccionada.
     function loadSessionTimes(movie, fechaSeleccionada, sesiones) {
         const formulario = document.querySelector('.formulario');
         if (!formulario) {

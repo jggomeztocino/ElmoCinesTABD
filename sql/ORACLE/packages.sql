@@ -45,6 +45,7 @@ CREATE OR REPLACE PACKAGE SesionesPkg AS
     FUNCTION sesiones_con_butacas_libres(p_idPelicula IN VARCHAR2) RETURN SYS_REFCURSOR;
     FUNCTION listar_sesion(p_idSesion IN NUMBER) RETURN SYS_REFCURSOR;
     FUNCTION butacas_ocupadas(p_idSesion IN NUMBER) RETURN SYS_REFCURSOR;
+    FUNCTION buscar_sesion(p_idPelicula IN VARCHAR2, p_fechaHora IN TIMESTAMP) RETURN SYS_REFCURSOR;
 END SesionesPkg;
 /
 
@@ -306,7 +307,7 @@ CREATE OR REPLACE PACKAGE BODY SesionesPkg AS
         c_sesiones SYS_REFCURSOR;
     BEGIN
         OPEN c_sesiones FOR
-            SELECT idSesion, FechaHora FROM Sesiones
+            SELECT idSesion, FechaHora, NumeroSala, SesionesPkg.calcular_butacas_libres(idSesion) FROM Sesiones
             WHERE idPelicula = p_idPelicula AND SesionesPkg.calcular_butacas_libres(idSesion) > 0;
         RETURN c_sesiones;
     END sesiones_con_butacas_libres;
@@ -350,6 +351,15 @@ CREATE OR REPLACE PACKAGE BODY SesionesPkg AS
         DELETE FROM Sesiones;
         COMMIT;
     END eliminar_todas_sesiones;
+
+    FUNCTION buscar_sesion(p_idPelicula IN VARCHAR2, p_fechaHora IN TIMESTAMP) RETURN SYS_REFCURSOR
+    AS
+        c_sesion SYS_REFCURSOR;
+    BEGIN
+        OPEN c_sesion FOR
+            SELECT idSesion FROM Sesiones WHERE idPelicula = p_idPelicula AND FechaHora = p_fechaHora;
+        RETURN c_sesion;
+    END buscar_sesion;
 END SesionesPkg;
 /
 

@@ -71,8 +71,8 @@ def generar_sesiones(sesiones_dia, hora_inicio, fecha_inicio, fecha_fin, salas, 
 
 
 # Ajusta el código de uso según los cambios
-fecha_inicio = datetime(2024, 5, 1)
-fecha_fin = datetime(2024, 5, 15)
+fecha_inicio = datetime(2024, 6, 1)
+fecha_fin = datetime(2024, 6, 30)
 salas = 8
 nButacas = 30
 sesiones_dia = 5

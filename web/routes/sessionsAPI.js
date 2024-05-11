@@ -46,7 +46,9 @@ router.get('/:movieId', async (req, res) => {
         while ((row = await resultSet.getRow())) {
             sessions.push({
                 idSesion: row[0],
-                fechaHora: row[1]
+                FechaHora: row[1],
+                NumeroSala: row[2],
+                ButacasLibres: row[3]
             });
         }
 

@@ -196,6 +196,16 @@ BEGIN
     RETURN c_sesion;
 END;
 
+-- Función para buscar una sesión según su idPelicula y su FechaHora.
+CREATE OR REPLACE FUNCTION buscar_sesion(p_idPelicula IN VARCHAR2, p_fechaHora IN TIMESTAMP) RETURN SYS_REFCURSOR
+AS
+    c_sesion SYS_REFCURSOR;
+BEGIN
+    OPEN c_sesion FOR
+        SELECT idSesion FROM Sesiones WHERE idPelicula = p_idPelicula AND FechaHora = p_fechaHora;
+    RETURN c_sesion;
+END;
+
 -- Función que devuelve las butacas ocupadas de una sesión dado su ID
 CREATE OR REPLACE FUNCTION butacas_ocupadas(p_idSesion IN NUMBER) RETURN SYS_REFCURSOR
 AS
