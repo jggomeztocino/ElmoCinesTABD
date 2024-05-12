@@ -108,36 +108,35 @@ router.get('/:movieId', async (req, res) => {
     }
 });
 
-router.get('/:movieId/:idPelicula/:FechaHora', async (req, res) => {
-    // Obtener el idSesion mediante el idPelicula y la FechaHora
+router.get('/id/:idReserva', async (req, res) => {
     let connection;
-    try {
-        connection = await openConnection();
-        const idPelicula = req.params.idPelicula;
-        const FechaHora = req.params.FechaHora;
-        const result = await connection.execute(
-            `SELECT idSesion
-            FROM Sesiones
-            WHERE idPelicula = :idPelicula AND FechaHora = :FechaHora`,
-            [idPelicula, FechaHora]
-        );
+try {
+    connection = await openConnection();
+    const idReserva = req.params.idReserva;
+    const result = await connection.execute(
+        `SELECT idSesion
+        FROM ButacasReservas br
+        JOIN Reservas r ON br.idReserva = r.idReserva
+        WHERE br.idButaca = :idReserva`,
+        [idReserva]
+    );
 
-        if (result.rows.length > 0) {
-            res.json(result.rows[0]);
-        } else {
-            res.status(404).send('Sesión no encontrada');
-        }
-    } catch (error) {
-        res.status(500).send(`Error al obtener la sesión: ${error.message}`);
-    } finally {
-        if (connection) {
-            try {
-                await connection.close();
-            } catch (error) {
-                console.error('Error al cerrar la conexión a Oracle', error);
-            }
+    if (result.rows.length > 0) {
+        res.json(result.rows[0]);
+    } else {
+        res.status(404).send('Reserva no encontrada');
+    }
+} catch (error) {
+    res.status(500).send(`Error al obtener la reserva: ${error.message}`);
+} finally {
+    if (connection) {
+        try {
+            await connection.close();
+        } catch (error) {
+            console.error('Error al cerrar la conexión a Oracle', error);
         }
     }
+}
 });
 
 router.delete('/:movieId/:sessionId', async (req, res) => {
@@ -150,40 +149,9 @@ router.delete('/:movieId/:sessionId', async (req, res) => {
             { sessionId: sessionId },
             { autoCommit: true }
         );
-        res.status(204).send();  // No content to send back
+        res.status(204).send();
     } catch (error) {
         res.status(500).send(`Error al eliminar la sesión: ${error.message}`);
-    } finally {
-        if (connection) {
-            try {
-                await connection.close();
-            } catch (error) {
-                console.error('Error al cerrar la conexión a Oracle', error);
-            }
-        }
-    }
-});
-
-router.get('/id/:idReserva', async (req, res) => {
-        let connection;
-    try {
-        connection = await openConnection();
-        const idReserva = req.params.idReserva;
-        const result = await connection.execute(
-            `SELECT idSesion
-            FROM ButacasReservas br
-            JOIN Reservas r ON br.idReserva = r.idReserva
-            WHERE br.idButaca = :idReserva`,
-            [idReserva]
-        );
-
-        if (result.rows.length > 0) {
-            res.json(result.rows[0]);
-        } else {
-            res.status(404).send('Reserva no encontrada');
-        }
-    } catch (error) {
-        res.status(500).send(`Error al obtener la reserva: ${error.message}`);
     } finally {
         if (connection) {
             try {

@@ -28,9 +28,12 @@ document.addEventListener("DOMContentLoaded", function() {
     // Función para obtener todos los usuarios
     async function getAllUsers() {
         try {
+            console.log('getting all users');
             const response = await fetch(apiUrl);
             if (!response.ok) throw new Error('Error al obtener los usuarios');
             const users = await response.json();
+            console.log('users received');
+            console.log(users);
             displayUsers(users);
         } catch (error) {
             console.error('getAllUsers:', error.message);

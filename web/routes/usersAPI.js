@@ -192,8 +192,9 @@ router.post('/', async (req, res) => {
     let connection;
     try {
         const newUser = req.body;
+        console.log(newUser);
         connection = await openConnection();
-        await connection.execute(`CALL ClientesPkg.InsertOrUpdateCliente(:email, :name, :phone)`, {
+        await connection.execute(`EXECUTE ClientesPkg.InsertOrUpdateCliente(:email, :name, :phone)`, {
             email: newUser.email,
             name: newUser.name,
             phone: newUser.phone
@@ -219,7 +220,7 @@ router.put('/:id', async (req, res) => {
         const userId = req.params.id;
         const updateData = req.body;
         connection = await openConnection();
-        const sql = `CALL ClientesPkg.modificar_cliente(:email, :name, :phone)`;
+        const sql = `EXECUTE ClientesPkg.modificar_cliente(:email, :name, :phone)`;
         const result = await connection.execute(sql, {
             email: userId,
             name: updateData.name,
@@ -249,7 +250,7 @@ router.delete('/:id', async (req, res) => {
     try {
         const userId = req.params.id;
         connection = await openConnection();
-        const result = await connection.execute(`CALL ClientesPkg.eliminar_cliente(:email)`, {
+        const result = await connection.execute(`EXECUTE ClientesPkg.eliminar_cliente(:email)`, {
             email: userId
         });
         if (result.rowsAffected === 0) {
@@ -275,7 +276,7 @@ router.delete('/', async (req, res) => {
     let connection;
     try {
         connection = await openConnection();
-        await connection.execute(`CALL ClientesPkg.eliminar_todos_clientes()`);
+        await connection.execute(`EXECUTE ClientesPkg.eliminar_todos_clientes()`);
         await connection.commit();
         res.send('All users deleted successfully');
     } catch (error) {

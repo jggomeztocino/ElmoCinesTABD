@@ -26,11 +26,6 @@ async function openConnection() {
     }
 }
 
-//router.get('/reservas', listarReservas);
-//router.get('/reservas/:id', listarReserva);
-//router.post('/reservas', realizarReserva);
-//router.delete('/reservas/:id', eliminarReserva);
-
 router.get('/', async (req, res) => {
     let connection;
     try {
@@ -86,9 +81,47 @@ router.get('/:id', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-    console.log(req.body);
     let connection;
-    
+    // ReservasPkg.realizar_reserva(idSesion, Sala, Correo, Nombre, Telefono, Entradas, Butacas)
+    try {
+        connection = await openConnection();
+        const { idSesion, Sala, Correo, Nombre, Telefono, Entradas, Butacas } = req.body;
+        console.log(req.body);
+        // Entradas es un array de objetos con la siguiente estructura:
+        // id = secuencia_idEntrada.NEXTVAL, idMenu = menus[i], Descripcion = 'Entrada adulta', Precio: 6
+        // o
+        // id = secuencia_idEntrada.NEXTVAL, idMenu = menus[i], Descripcion = 'Entrada infantil', Precio: 4
+        // Y debemos convertirlo a una Tipo de dato de Oracle con la siguiente estructura:
+        // TipoEntradaArray(TipoEntrada(1, 1, 'Entrada adulta', 6), TipoEntrada(2, 1, 'Entrada infantil', 4)) con todas las entradas
+        let EntradasSQL = '';
+        Entradas.forEach((entrada) => {
+            EntradasSQL += `TipoEntrada(${entrada.idEntrada}, ${entrada.idMenu}, '${entrada.Descripcion}', ${entrada.Precio}), `;
+        });
+        // Eliminamos la última coma y espacio y añadimos los paréntesis
+        EntradasSQL = `TipoEntradaArray(${EntradasSQL.slice(0, -2)})`;
+
+        // Butacas es un array de números de butacas, como [1, 2, 3, 4, 5]
+        // Y debemos convertirlo a una Tipo de dato de Oracle con la siguiente estructura:
+        // ButacasSeleccionadas(1, 2, 3, 4, 5) con todas las butacas
+        let ButacasSQL = `ButacasSeleccionadas(${Butacas.join(', ')})`;
+
+        await connection.execute(
+            `BEGIN ReservasPkg.realizar_reserva(:idSesion, :Sala, :Correo, :Nombre, :Telefono, :Entradas, :Butacas); END;`,
+            { idSesion, Sala, Correo, Nombre, Telefono, EntradasSQL, ButacasSQL }
+        );
+        res.status(201).send('Reserva realizada');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error al realizar la reserva: ' + error.message);
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
 });
 
 module.exports = router;

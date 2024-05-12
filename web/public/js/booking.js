@@ -1,9 +1,7 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const { movie, sesion, butacas } = obtenerParametrosURL();
-
     let butacasArray = butacas ? butacas.split(',') : [];
 
-    // Si se han pasado los parámetros necesarios, se procede a cargar la información de la película y la sesión
     if (movie && sesion && butacas) {
         const fecha = formatearFecha(sesion);
         const hora = formatearHora(sesion);
@@ -11,9 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
         actualizarInfoSesion(fecha, hora, butacasArray);
         cargarInformacionPelicula(movie);
 
-        // Verificar la disponibilidad de las butacas seleccionadas
-        verificarButacasDisponibles(movie, sesion, butacasArray)
+        try {
+            const { idSesion, NumeroSala } = await obtenerSesionSalas(movie, sesion); 
+
+            // Verificar la disponibilidad de las butacas seleccionadas
+            verificarButacasDisponibles(movie, idSesion, butacasArray)
             .then(disponibles => {
+                console.log(disponibles);
                 if (disponibles) {
                     generarDesplegableMenores(butacasArray.length);
                     generarDesplegablesMenus(butacasArray.length);
@@ -24,97 +26,132 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .catch(error => mensajeError('Ocurrió un error al verificar la disponibilidad de las butacas.', error));
 
-        // Evento para el botón de reserva
-        document.querySelector('.btn').addEventListener('click', (e) => {
-            e.preventDefault();
-            if (validarCorreo() && validarTelefono() && validarNombre()) { // Si los campos de texto son válidos
-                // Se actualiza la información del usuario
-                let correo = document.querySelector('#correo').value;
-                let nombreCompleto = document.querySelector('#nombre').value;
-                let telefono = document.querySelector('#telefono').value;
+            // Evento para el botón de reserva
+            document.querySelector('.btn').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (validarCorreo() && validarTelefono() && validarNombre()) { // Si los campos de texto son válidos
+                    // Se actualiza la información del usuario
+                    let correo = document.querySelector('#correo').value;
+                    let nombreCompleto = document.querySelector('#nombre').value;
+                    let telefono = document.querySelector('#telefono').value;
 
-                const menusTexto = ['nada', 'betterTogether', 'grande', 'mediano', 'infantil'];
-                let menusSeleccionados = [];
-                for (let i = 1; i <= butacasArray.length; i++) {
-                    let menu = document.querySelector(`#menu-${i}`).value;
-                    if (menu > 0) {
-                        menusSeleccionados.push(`entrada${i}-${menusTexto[menu]}`);
+                    const menusTexto = ['nada', 'betterTogether', 'grande', 'mediano', 'infantil'];
+                    let menusSeleccionados = [];
+                    for (let i = 1; i <= butacasArray.length; i++) {
+                        let menu = document.querySelector(`#menu-${i}`).value;
+                        if (menu > 0) {
+                            menusSeleccionados.push(`entrada${i}-${menusTexto[menu]}`);
+                        }
                     }
-                }
 
-                let entradasAdultos = butacasArray.length - document.querySelector('#menoresDesplegable').value;
-                let entradasMenores = parseInt(document.querySelector('#menoresDesplegable').value);
+                    let menus = []
+                    for(let i = 0; i < butacasArray.length; i++) {
+                        // Haya o no menú seleccionado, se añade (0 en el caso que no esté en menusSeleccionados)
+                        // Buscar una entrada en el array que sea entradai-... y si no se encuentra, insertar un 0
+                        let temp = menusSeleccionados.find(menu => menu.includes(`entrada${i + 1}`)) || 0; // Si no se encuentra, se inserta un 0
+                        if(temp !== 0)
+                        {
+                            // Obtener el último carácter de la cadena y convertirlo a número
+                            temp = temp[temp.length - 1];
+                        }
+                        menus.push(parseInt(temp));
+                    }
+                    console.log(menus);
 
-                let nuevoUsuario = {
-                    correo: correo,
-                    nombre: nombreCompleto,
-                    telefono: telefono,
-                }
+                    let entradasAdultos = butacasArray.length - document.querySelector('#menoresDesplegable').value;
+                    let entradasMenores = parseInt(document.querySelector('#menoresDesplegable').value);
 
-                // 1. Invocar la función verificarButacasDisponibles
-                // 1. Insertar Cliente con InsertOrUpdateCliente(Correo, Nombre, Telefono)
-                // 2. Insertar Reserva con ReservasPkg.realizar_reserva(Sesion, Sala, Correo, Nombre, Telefono, Entradas, Butacas)
-                // 2.1. Entradas a su vez es una estructura, con atributos idEntrada, idMenu, Descripcion y Precio
-                // Nota: Los menús se enumeran del 0 al 4, siendo 0 el menú sin seleccionar
-                // Por tanto, debe estructurarse de la siguiente manera, adaptándose a Oracle:
-                // TipoEntradaArray(TipoEntrada(secuencia_idEntrada.NEXTVAL, 0, 'Entrada adulta', 6), TipoEntrada(secuencia_idEntrada.NEXTVAL, 1, 'Entrada infantil', 4), ...)
-                // Con tantos TipoEntrada como entradas haya
-                // 2.2. Butacas es un VARRAY de Butaca, que tendrá hasta 5 butacas, que deberán ser transformados inversamente de A1, A2, A3, A4, A5 a 1, 2, 3, 4, 5...
-                verificarButacasDisponibles(movie, sesion, butacasArray)
-                    .then(disponibles => {
-                        fetch(`/users`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(nuevoUsuario)
-                        });
-        
-                        let idSesion;
-                        // Obtener el idSesion desde /sessions/:movieId/:idPelicula/:FechaHora' (únicamente devuelve idSesion) y convertirlo a int
-                        fetch(`/sessions/${movie}/${sesion}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                idSesion = parseInt(data.idSesion);
-                            })
-                            .catch(error => mensajeError('Error al obtener el id de la sesión', error));
-        
-                            
-                        // realizar_reserva(idSesion, Sala, Correo, Nombre, Telefono, Entradas, Butacas)
-                        fetch(`/booking`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(
-                                {
-                                    idSesion: idSesion,
-                                    sala: 1,
-                                    correo: correo,
-                                    nombre: nombreCompleto,
-                                    telefono: telefono,
-                                    entradas: {
-                                        adultas: entradasAdultos,
-                                        menores: entradasMenores,
-                                        menus: menusSeleccionados
-                                    },
-                                    butacas: butacasArray.map(butaca => 
+                    let entradas = [];
+                    // Debemos estructurar las entradas de la siguiente manera:
+                    // TipoEntradaArray(TipoEntrada(secuencia_idEntrada.NEXTVAL, 0, 'Entrada adulta', 6), TipoEntrada(secuencia_idEntrada.NEXTVAL, 1, 'Entrada infantil', 4), ...)
+                    for (let i = 0; i < entradasAdultos + entradasMenores; i++) {
+                        for (let j = 0; j < entradasAdultos; j++) {
+                            // id = secuencia_idEntrada.NEXTVAL, idMenu = menus[i], Descripcion = 'Entrada adulta', Precio: 6
+                            entradas.push({idEntrada: 'secuencia_idEntrada.NEXTVAL', idMenu: menus[i], Descripcion: 'Entrada adulta', Precio: 6});
+                        }
+                        for (let j = 0; j < entradasMenores; j++) {
+                            // id = secuencia_idEntrada.NEXTVAL, idMenu = menus[i], Descripcion = 'Entrada infantil', Precio: 4
+                            entradas.push({idEntrada: 'secuencia_idEntrada.NEXTVAL', idMenu: menus[i], Descripcion: 'Entrada infantil', Precio: 4});
+                        }
+                    }
+                    console.log(entradas);
+
+                    let nuevoUsuario = {
+                        correo: correo,
+                        nombre: nombreCompleto,
+                        telefono: telefono,
+                    }
+
+                    console.log(nuevoUsuario);
+
+                    // 1. Invocar la función verificarButacasDisponibles
+                    // 1. Insertar Cliente con InsertOrUpdateCliente(Correo, Nombre, Telefono)
+                    // 2. Obtener el idSesion para realizar una Reserva con ReservasPkg.realizar_reserva(Sesion, Sala, Correo, Nombre, Telefono, Entradas, Butacas)
+                    // 2.1. Entradas a su vez es una estructura, con atributos idEntrada, idMenu, Descripcion y Precio
+                    // Nota: Los menús se enumeran del 0 al 4, siendo 0 el menú sin seleccionar
+                    // Por tanto, debe estructurarse de la siguiente manera, adaptándose a Oracle:
+                    // TipoEntradaArray(TipoEntrada(secuencia_idEntrada.NEXTVAL, 0, 'Entrada adulta', 6), TipoEntrada(secuencia_idEntrada.NEXTVAL, 1, 'Entrada infantil', 4), ...)
+                    // Con tantos TipoEntrada como entradas haya
+                    // 2.2. Butacas es un VARRAY de Butaca, que tendrá hasta 5 butacas, que deberán ser transformados inversamente de A1, A2, A3, A4, A5 a 1, 2, 3, 4, 5...
+                    
+                    verificarButacasDisponibles(movie, idSesion, butacasArray)
+                        .then(disponibles => {
+                            if (disponibles) {
+                                // realizar_reserva(idSesion, Sala, Correo, Nombre, Telefono, Entradas, Butacas)
+                                fetch(`/booking`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(
                                         {
-                                            let fila = butaca.charCodeAt(0) - 65;
-                                            let columna = parseInt(butaca[1]);
-                                            return fila * 5 + columna;
+                                            idSesion: idSesion,
+                                            Sala: NumeroSala,
+                                            Correo: correo,
+                                            Nombre: nombreCompleto,
+                                            Telefono: telefono,
+                                            Entradas: entradas,
+                                            Butacas: butacasArray.map(butaca => 
+                                                {
+                                                    let fila = butaca.charCodeAt(0) - 65;
+                                                    let columna = parseInt(butaca[1]);
+                                                    return fila * 5 + columna;
+                                                }
+                                            )
                                         }
                                     )
-                                }
-                            )
-                        });
-                    })
+                                });
+                            } 
+                            else 
+                            {
+                                mensajeError('Alguna de las butacas seleccionadas ya ha sido reservada. \nInténtelo de nuevo :(');
+                            }
+                        }).catch(error => mensajeError('Ocurrió un error al verificar la disponibilidad de las butacas.', error));
                 }
             });
-        // Listeners para comprobar la validez de los campos de texto
-        document.querySelector('#nombre').addEventListener('input', actualizarInfo);
-        document.querySelector('#correo').addEventListener('input', actualizarInfo);
-        document.querySelector('#telefono').addEventListener('input', actualizarInfo);
+            // Listeners para comprobar la validez de los campos de texto
+            document.querySelector('#nombre').addEventListener('input', actualizarInfo);
+            document.querySelector('#correo').addEventListener('input', actualizarInfo);
+            document.querySelector('#telefono').addEventListener('input', actualizarInfo);
+        } catch (error) {
+            console.error('Error al obtener la sesión:', error);
+            mensajeError('Error al obtener la información de la sesión.');
+        }
     } else {
         mensajeError('Error de parametrización. \nNo introduzca la URL manualmente >:(', 'URL introducida manualmente');
     }
 });
+
+function obtenerSesionSalas(movie, FechaHora) {
+    return fetch(`/sessions/${movie}`)  // Esta línea inicia la solicitud fetch
+        .then(response => response.json())
+        .then(data => {
+            const sesion = data.find(sesion => sesion.FechaHora === FechaHora);
+            if (sesion) {
+                return { idSesion: sesion.idSesion, NumeroSala: sesion.NumeroSala };  // Devuelve un objeto
+            } else {
+                throw new Error('Sesión no encontrada');
+            }
+        });
+}
 
 // Obtiene los parámetros de la URL
 function obtenerParametrosURL() {
@@ -152,21 +189,29 @@ function cargarInformacionPelicula(movie) {
     fetch(`/billboard/${movie}`)
         .then(response => response.json())
         .then(data => {
-            document.querySelector('.titulo-seccion').textContent = 'RESERVA DE ENTRADAS: ' + data.Titulo;
+            document.querySelector('.titulo-seccion').textContent = 'RESERVA DE ENTRADAS: ' + data.titulo;
         })
         .catch(error => mensajeError('Error al cargar la información de la sesión', error));
 }
 
 // Verifica la disponibilidad de las butacas seleccionadas
-function verificarButacasDisponibles(movie, sesion, butacasArray) {
-    return fetch(`/sessions/${movie}/${sesion}`)
+function verificarButacasDisponibles(movie, idSesion, butacasArray) {
+    return fetch(`/sessions/${movie}`) 
         .then(response => response.json())
-        .then(data => butacasArray.every(butaca => data.butacas_detalles.some(b => b.numero === butaca && b.estado === 'libre')))
-        .catch(error => {
-            mensajeError('Error al cargar la información de la sesión', error);
-            throw error;
+        .then(data => {
+            const sesion = data.find(sesion => sesion.idSesion === idSesion);
+            if (sesion) {
+                const butacasOcupadas = sesion.butacas_detalles.filter(butaca => butacasArray.includes(butaca.numero) && butaca.estado === 'ocupado');
+                return butacasOcupadas.length === 0;  // True si no hay butacas ocupadas
+            } else {
+                throw new Error('Sesión no encontrada');
+            }
+        }).catch(error => {
+            console.error('Error al verificar disponibilidad:', error);
+            throw error;  // Re-lanza el error para manejarlo más adelante
         });
 }
+
 
 // Muestra un mensaje de error en la página
 function mensajeError(msj, error) {
