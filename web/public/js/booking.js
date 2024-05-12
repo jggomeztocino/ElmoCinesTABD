@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Verificar la disponibilidad de las butacas seleccionadas
             verificarButacasDisponibles(movie, idSesion, butacasArray)
             .then(disponibles => {
-                console.log(disponibles);
                 if (disponibles) {
                     generarDesplegableMenores(butacasArray.length);
                     generarDesplegablesMenus(butacasArray.length);

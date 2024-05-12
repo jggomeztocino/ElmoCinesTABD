@@ -81,7 +81,8 @@ CREATE OR REPLACE PACKAGE BODY ClientesPkg AS
         c_clientes SYS_REFCURSOR;
     BEGIN
         OPEN c_clientes FOR
-            SELECT * FROM Clientes;
+            SELECT * FROM Clientes
+            WHERE Correo NOT LIKE '%@guest.elmocines.com';
         RETURN c_clientes;
     END listar_clientes;
 
