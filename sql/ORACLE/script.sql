@@ -12619,3 +12619,5 @@ INSERT INTO Reservas (idReserva, idSesion, Cliente, FormaPago, FechaCompra, Entr
 COMMIT;
 INSERT INTO ButacasReservas (idButacaReserva, idButaca, NumeroSala, idReserva) VALUES (secuencia_idButacaReserva.NEXTVAL, 13, 5, secuencia_idReserva.CURRVAL);
 COMMIT;
+EXECUTE ClientesPkg.insertOrUpdateCliente('germantoconruiz@gmail.com', 'German Jesus', '682598567');
+COMMIT;

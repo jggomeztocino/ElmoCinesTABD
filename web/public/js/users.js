@@ -71,11 +71,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 <div class="col-12 col-lg-3 mb-3">
                     <div class="card text-white">
                         <div class="card-body">
-                            <h5 class="card-title">${user.name}</h5>
-                            <p class="card-text">${user._id}</p>
-                            <p class="card-text">${user.phone}</p>
-                            <button class="btn btn-danger mb-3" data-email="${user._id}">Eliminar</button>
-                            <button class="btn btn-primary" data-edit-email="${user._id}">Editar</button>
+                            <h5 class="card-title">${user.Nombre}</h5>
+                            <p class="card-text">${user.Correo}</p>
+                            <p class="card-text">${user.Telefono}</p>
+                            <button class="btn btn-danger mb-3" data-email="${user.Correo}">Eliminar</button>
+                            <button class="btn btn-primary" data-edit-email="${user.Correo}">Editar</button>
                         </div>
                     </div>
                 </div>
@@ -122,12 +122,13 @@ document.addEventListener("DOMContentLoaded", function() {
     // Función para mostrar un modal con un input para editar el nombre de un usuario
     function editUserModal(email) {
         const user = prompt("Ingrese el nuevo nombre del usuario:");
-        if (user !== null && user.trim() !== "") {
-            updateUser(email, { name: user });
+        const tlf = prompt("Ingrese el nuevo teléfono:");
+        if (user !== null && user.trim() !== "" && tlf !== null && tlf.trim() !== "") {
+            // Si ambos campos son válidos, se envían al servidor
+            updateUser(email, { name: user, phone: tlf });
         } else {
-            alert("El nombre no puede estar vacío.");
+            alert("El nombre y el teléfono no pueden estar vacíos.");
         }
-        // Implementar telefono
     }
 
     // Función para actualizar un usuario
@@ -142,9 +143,10 @@ document.addEventListener("DOMContentLoaded", function() {
             });
             if (!response.ok) throw new Error('Error al actualizar el usuario');
             alert('Usuario actualizado correctamente');
-            await getAllUsers();
+            await getAllUsers();  // Asegurarse de que la vista se actualice con los nuevos datos
         } catch (error) {
             console.error('updateUser:', error.message);
+            alert('Error al actualizar el usuario: ' + error.message);
         }
     }
 

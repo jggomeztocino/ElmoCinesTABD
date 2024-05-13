@@ -80,7 +80,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-router.post('/', async (req, res) => {
+/*router.post('/', async (req, res) => {
     let connection;
     // ReservasPkg.realizar_reserva(idSesion, Sala, Correo, Nombre, Telefono, Entradas, Butacas)
     try {
@@ -143,6 +143,63 @@ router.post('/', async (req, res) => {
                 await connection.close();
             } catch (err) {
                 console.error(err);
+            }
+        }
+    }
+});*/
+
+router.post('/', async (req, res) => {
+    let connection;
+    try {
+        connection = await openConnection();
+        const { idSesion, Sala, Correo, Nombre, Telefono, Entradas, Butacas } = req.body;
+        
+        // Suponiendo que Butacas es un array de números y Entradas necesita ser convertido
+        let entradaBindVars = Entradas.map(entrada => ({
+            ID_ENTRADA: entrada.idEntrada, // Suponiendo que esta ID es generada por Oracle, quizás no necesites enviarla
+            ID_MENU: entrada.idMenu,
+            DESCRIPCION: entrada.Descripcion,
+            PRECIO: entrada.Precio
+        }));
+        
+        // Suponiendo que tienes un tipo definido en Oracle que coincide con esta estructura
+        const entradasOracleType = connection.getDbObjectClass("TIPOENTRADAARRAY"); // Reemplaza 'TU_TIPO_ORACLE' con tu tipo definido en Oracle
+
+        const result = await connection.execute(
+            `BEGIN 
+                ReservasPkg.realizar_reserva(
+                    :idSesion, 
+                    :Sala, 
+                    :Correo, 
+                    :Nombre, 
+                    :Telefono, 
+                    :Entradas, 
+                    :Butacas
+                ); 
+            END;`,
+            {
+                idSesion,
+                Sala,
+                Correo,
+                Nombre,
+                Telefono,
+                Entradas: { type: entradasOracleType, dir: oracledb.BIND_IN, val: entradaBindVars },
+                Butacas: { type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: Butacas }
+            },
+            { autoCommit: true }
+        );
+
+        res.status(201).send('Reserva realizada exitosamente');
+    } catch (error) {
+        console.error('Error al realizar la reserva: ', error);
+        res.status(500).send('Error al realizar la reserva: ' + error.message);
+        console.log(error.message);
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error('Error closing connection ', err);
             }
         }
     }

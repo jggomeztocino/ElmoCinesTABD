@@ -138,13 +138,24 @@ router.get('/', async (req, res) => {
     let connection;
     try {
         connection = await openConnection();
-        const result = await connection.execute(`BEGIN :cursor := ClientesPkg.listar_clientes(); END;`, {
-            cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
-        });
+        const result = await connection.execute(
+            `BEGIN :cursor := ClientesPkg.listar_clientes(); END;`,
+            {
+                cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+            }
+        );
         const resultSet = result.outBinds.cursor;
         const rows = await resultSet.getRows(); // Fetch all rows
+
+        // Transform the rows into objects with specific properties
+        const clients = rows.map((row) => ({
+            Nombre: row[1],  // Assuming 'Nombre' is the second column in your row
+            Correo: row[0],  // Assuming 'Correo' is the first column
+            Telefono: row[2] // Assuming 'Telefono' is the third column
+        }));
+
         await resultSet.close();
-        res.json(rows);
+        res.json(clients);
     } catch (error) {
         res.status(500).send('Error retrieving users: ' + error.message);
     } finally {
@@ -158,20 +169,30 @@ router.get('/', async (req, res) => {
     }
 });
 
+
 router.get('/:id', async (req, res) => {
     let connection;
     try {
         const userId = req.params.id;
         connection = await openConnection();
-        const result = await connection.execute(`BEGIN :cursor := ClientesPkg.listar_cliente(:id); END;`, {
-            id: userId,
-            cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
-        });
+        const result = await connection.execute(
+            `BEGIN :cursor := ClientesPkg.listar_cliente(:id); END;`,
+            {
+                id: userId,
+                cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+            }
+        );
         const resultSet = result.outBinds.cursor;
         const rows = await resultSet.getRows(); // Fetch all rows
+        
         await resultSet.close();
         if (rows.length > 0) {
-            res.json(rows[0]);
+            const client = {
+                Correo: rows[0][0], // Asume que Correo está en la primera columna
+                Nombre: rows[0][1], // Asume que Nombre está en la segunda columna
+                Telefono: rows[0][2] // Asume que Telefono está en la tercera columna
+            };
+            res.json(client);
         } else {
             res.status(404).send('User not found');
         }
@@ -187,6 +208,7 @@ router.get('/:id', async (req, res) => {
         }
     }
 });
+
 
 router.post('/', async (req, res) => {
     let connection;
@@ -220,26 +242,31 @@ router.put('/:id', async (req, res) => {
         const userId = req.params.id;
         const updateData = req.body;
         connection = await openConnection();
-        const sql = `EXECUTE ClientesPkg.modificar_cliente(:email, :name, :phone)`;
-        const result = await connection.execute(sql, {
-            email: userId,
-            name: updateData.name,
-            phone: updateData.phone
-        });
-        if (result.rowsAffected === 0) {
-            res.status(404).send('User not found');
-        } else {
-            await connection.commit();
-            res.send('User updated successfully');
-        }
+
+        // Usar BEGIN ... END; para envolver la llamada al procedimiento almacenado
+        const sql = `BEGIN ClientesPkg.modificar_cliente(:email, :name, :phone); END;`;
+        const binds = {
+            email: userId,      // ID del usuario como correo
+            name: updateData.name, // Nombre a actualizar
+            phone: updateData.phone // Teléfono a actualizar
+        };
+
+        // Ejecución del procedimiento almacenado
+        const result = await connection.execute(sql, binds, { autoCommit: true });
+
+        // Oracle no actualiza rowsAffected en las llamadas a procedimientos, por eso no podemos usarlo para verificar
+        // Si necesitas verificar si el usuario fue realmente actualizado, necesitas otro método, posiblemente una consulta adicional o una salida del procedimiento
+        res.send('User updated successfully');
+        
     } catch (error) {
+        console.error('Error updating user: ', error);
         res.status(500).send('Error updating user: ' + error.message);
     } finally {
         if (connection) {
             try {
-                await connection.close();
+                await connection.close(); // Asegurar que la conexión siempre se cierra
             } catch (err) {
-                console.error(err);
+                console.error('Error closing connection: ', err);
             }
         }
     }
@@ -250,43 +277,62 @@ router.delete('/:id', async (req, res) => {
     try {
         const userId = req.params.id;
         connection = await openConnection();
-        const result = await connection.execute(`EXECUTE ClientesPkg.eliminar_cliente(:email)`, {
-            email: userId
-        });
-        if (result.rowsAffected === 0) {
-            res.status(404).send('User not found');
-        } else {
-            await connection.commit();
+        
+        // Utilizar una llamada de procedimiento adecuada en PL/SQL
+        const result = await connection.execute(
+            `BEGIN ClientesPkg.eliminar_cliente(:email); END;`, // Corregido para usar la sintaxis correcta de PL/SQL
+            { email: userId },
+            { autoCommit: false } // Desactivar autoCommit para manejarlo manualmente
+        );
+
+        // Oracle no usa `rowsAffected` directamente en este contexto para los procedimientos almacenados
+        // Necesitamos confirmar que el procedimiento se ejecutó sin errores
+        if (result) {
+            await connection.commit(); // Asegurar que la transacción se cometa si no hay errores
             res.send('User deleted successfully');
+        } else {
+            await connection.rollback(); // Asegurar que la transacción se revierta si hay un fallo
+            res.status(404).send('User not found');
         }
     } catch (error) {
+        await connection.rollback(); // Revertir cualquier cambio si hay una excepción
         res.status(500).send('Error deleting user: ' + error.message);
+        console.error('Error during deletion:', error);
     } finally {
         if (connection) {
             try {
                 await connection.close();
             } catch (err) {
-                console.error(err);
+                console.error('Error closing connection:', err);
             }
         }
     }
 });
 
+
 router.delete('/', async (req, res) => {
     let connection;
     try {
         connection = await openConnection();
-        await connection.execute(`EXECUTE ClientesPkg.eliminar_todos_clientes()`);
-        await connection.commit();
+        
+        // Correcto uso del procedimiento almacenado dentro de un bloque BEGIN ... END;
+        const sql = `BEGIN ClientesPkg.eliminar_todos_clientes(); END;`;
+        await connection.execute(sql, {}, { autoCommit: true }); // AutoCommit puede ser útil aquí si deseas que la operación se confirme automáticamente
+
         res.send('All users deleted successfully');
     } catch (error) {
+        console.error('Error deleting users: ', error);
         res.status(500).send('Error deleting users: ' + error.message);
+        // Es buena práctica agregar aquí un rollback en caso de que autoCommit esté deshabilitado y la operación falle
+        if (!connection.autoCommit) {
+            await connection.rollback();
+        }
     } finally {
         if (connection) {
             try {
                 await connection.close();
             } catch (err) {
-                console.error(err);
+                console.error('Error closing connection: ', err);
             }
         }
     }
