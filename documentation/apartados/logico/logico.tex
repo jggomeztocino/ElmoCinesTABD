@@ -1,0 +1,38 @@
+Para esquematizar la información que gestiona el sistema, realizamos varias iteraciones perfilando y ajustando los esquemas para cubrir el máximo número de necesidades posible.
+
+\section{Diseño conceptual}
+Siendo esta la versión más genérica del sistema, se plantea el siguiente esquema:
+\fotocentradacomentada{documentation/apartados/logico/diagramas/conceptual.png}{.45}{Diagrama de clases persistente}
+
+En este diagrama podemos ver como reflejamos distintas entidades que conforman un cine:
+\begin{itemize}
+    \item \textit{Clientes}
+    \item \textit{Películas}
+    \begin{itemize}
+        \item Una película tiene (está compuesta por) \textit{Sesiones} programadas.
+    \end{itemize}
+    \item \textit{Butacas}
+    \item \textit{Menú}
+    \item \textit{Reservas}
+    \begin{itemize}
+        \item A una reserva son asignadas (está compuesta por) \textit{Entradas}.
+    \end{itemize}
+\end{itemize}
+
+Adicionalmente, y así lo refleja el diagrama, se limita el número de compras de entradas máximo por cliente en una misma reserva.
+
+\newpage
+\section{Diseño lógico objeto-relacional}
+Es el resultado de la segunda iteración más importante sobre el esquema original. En este caso, tras decidirse desarrollar un sistema de bases de datos, pero sin entrar en el dialecto a usar, se diseña un nuevo diagrama con las características del estándar SQL3:
+\fotocentradacomentada{documentation/apartados/logico/diagramas/logicoOR.png}{1}{Diagrama de clases O-R}
+
+Toda iteración posterior en el que se especifique un dialecto en concreto deberá cumplir con las especificaciones de este diagrama en SQL estándar. \\
+
+\textit{Nota: Por simplificación en la gestión del sistema, se ha decidido eliminar una composición y modelarlo con una clase independiente en su lugar.}
+
+\textit{Nota 2: La herramienta de modelado del diagrama ha reflejado algunas divisiones en las clases, más no tienen significado alguno, son simplemente un bug visual.}
+
+\newpage
+\section{Diseño lógico específico}
+El resultado de este diseño es fruto de la última iteración sobre el esquema del que originalmente partimos. En esta versión, se especifica un dialecto de SQL a usar, siendo en este caso Oracle SQL*Plus. Las características propias del dialecto se reflejan en el diagrama, aunque, tal y como se indicó en el diseño anterior, respeta toda la estructura y especificaciones del lenguaje SQL estándar:
+\fotocentradacomentada{documentation/apartados/logico/diagramas/logicoE.png}{1}{Diagrama de clases específico}

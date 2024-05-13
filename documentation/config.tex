@@ -9,7 +9,19 @@
 % Paquetes útiles
 \usepackage{amsmath, amssymb} % Paquetes para matemáticas
 \usepackage{graphicx} % Para incluir imágenes
-\usepackage{hyperref} % Para insertar enlaces
+% Enlaces en el documento
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,      
+    urlcolor=blue,
+    pdftitle={MEMORIA DE PROYECTO - TABD},
+    pdfauthor={Jesús Gómez, Germán Tocón}
+    pdfpagemode=FullScreen,
+    }
+
+\urlstyle{same}
 \usepackage[table,xcdraw]{xcolor} % Para colores en tablas y texto
 \usepackage{caption}
 \usepackage{subcaption}
@@ -17,21 +29,11 @@
 \usepackage{booktabs} % Para tablas de calidad de publicación
 \usepackage{longtable} % Para tablas que ocupan varias páginas
 \usepackage{tabularx} % Para tablas con ancho ajustable
-
-% Configuración de enlaces (https://www.overleaf.com/learn/latex/Hyperlinks)
-\hypersetup{
-    colorlinks=true,
-    linkcolor=blue,
-    filecolor=magenta,      
-    urlcolor=cyan,
-    pdftitle={TABD: MEMORIA DE PROYECTO. GERMÁN TOCÓN \& JESÚS GÓMEZ},
-    pdfpagemode=FullScreen,
-}
-\urlstyle{same}
+\usepackage{microtype} % Mejora la tipografía del documento
 
 % Configuración de visualización de código
 \usepackage{minted}
-\usemintedstyle{emacs} % https://www.overleaf.com/learn/latex/Code_Highlighting_with_minted#Reference_guide
+\usemintedstyle{manni} % https://www.overleaf.com/learn/latex/Code_Highlighting_with_minted#Reference_guide
 
 % Estilos y comandos personalizados
 \setlength{\parindent}{0pt} % Elimina la indentación de párrafos
@@ -58,3 +60,11 @@
 }
 
 
+\usepackage{pdfpages}
+
+\usepackage{fancyvrb}
+\makeatletter
+\def\KV@FV@lastline@default{%
+  \let\FancyVerbStopNum\m@ne
+  \let\FancyVerbStopString\relax}
+\fvset{lastline}

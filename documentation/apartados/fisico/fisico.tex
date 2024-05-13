@@ -1,0 +1,82 @@
+El diseño lógico gestiona aquellos aspectos de la implementación física de los datos, es decir, cómo se almacenan y gestionan estos una vez almacenados. Este diseño debe reflejar la naturaleza de las distintas entidades que conforman el sistema y ajustarlas para el mejor rendimiento y eficiencia espacial posible. \\
+
+Para ello, Oracle SQL*Plus dispone de una serie de herramientas que permiten ajustar los parámetros de configuración de la base de datos para cada entidad. Entre ellos, los que hemos usado son:
+\begin{itemize}
+    \item \textbf{PCTFREE}: Define el porcentaje de espacio reservado en cada bloque de la base de datos para permitir la expansión de las filas existentes que podrían actualizar sus datos en el futuro sin requerir la reubicación a otro bloque, ayudando a evitar la fragmentación.
+    \item \textbf{PCTUSED}: Determina el porcentaje de espacio utilizado en un bloque antes de que se considere disponible para nuevas inserciones, ayudando a gestionar el espacio efectivamente después de eliminaciones o actualizaciones.
+    \item \textbf{INITRANS}: Especifica el número inicial de ranuras de transacción reservadas en el encabezado de bloque cuando un bloque es inicialmente formateado, permitiendo múltiples transacciones concurrentes.
+    \item \textbf{MAXTRANS}: Establece el número máximo de transacciones que pueden modificar el bloque de manera concurrente, limitando el número de ranuras de transacción por bloque.
+    \item \textbf{NOCACHE/CACHE}: Controla si los valores de secuencias para los ID generados serán pre alojados en memoria para un acceso rápido (CACHE) o si no se utilizará la caché (NOCACHE), adecuado para operaciones de inserción menos frecuentes o para ahorrar recursos de caché.
+\end{itemize}
+
+A continuación, para cada entidad de nuestro sistema, se especifica los parámetros usados y la justificación de su uso atendiendo a la naturaleza de estas.
+
+\subsection{Películas}
+\textbf{Naturaleza:} Almacena información principal de películas. Se esperan más consultas que modificaciones.
+\begin{itemize}
+    \item \textbf{PCTFREE}: 10\% -- Reserva espacio para futuras actualizaciones de las filas.
+    \item \textbf{PCTUSED}: 70\% -- Se considera disponible para nuevas inserciones solo cuando el 70\% de su espacio está libre.
+    \item \textbf{INITRANS}: 2 -- Transacciones concurrentes posibles por bloque.
+    \item \textbf{MAXTRANS}: 255 -- Máximo de transacciones concurrentes permitidas.
+    \item \textbf{NOCACHE}: No utiliza caché para la generación de IDs.
+\end{itemize}
+
+\subsection{Sesiones}
+\textbf{Naturaleza:} Gestiona las sesiones de películas, con frecuentes actualizaciones de horarios y alta demanda de accesibilidad.
+\begin{itemize}
+    \item \textbf{PCTFREE}: 10\%
+    \item \textbf{PCTUSED}: 80\% -- Aumenta el umbral de uso debido a frecuentes cambios.
+    \item \textbf{INITRANS}: 3 -- Más transacciones concurrentes posibles.
+    \item \textbf{MAXTRANS}: 255
+    \item \textbf{NOCACHE}
+\end{itemize}
+
+\subsection{Butacas}
+\textbf{Naturaleza:} Contiene información de las butacas con bajas frecuencias de actualización.
+\begin{itemize}
+    \item \textbf{PCTFREE}: 5\% -- Menor reserva de espacio libre.
+    \item \textbf{PCTUSED}: 90\% -- Mayor umbral de llenado.
+    \item \textbf{INITRANS}: 1 -- Bajas transacciones concurrentes.
+    \item \textbf{MAXTRANS}: 100
+    \item \textbf{CACHE}: Beneficia la rapidez en consultas frecuentes.
+\end{itemize}
+
+\subsection{Clientes}
+\textbf{Naturaleza:} Almacena datos de clientes que pueden cambiar con frecuencia (p.ej., dirección, teléfono).
+\begin{itemize}
+    \item \textbf{PCTFREE}: 15\% -- Más espacio para actualizaciones.
+    \item \textbf{PCTUSED}: 75\%
+    \item \textbf{INITRANS}: 4 -- Preparada para un número moderado de transacciones concurrentes.
+    \item \textbf{MAXTRANS}: 200
+    \item \textbf{NOCACHE}
+\end{itemize}
+
+\subsection{Reservas}
+\textbf{Naturaleza:} Maneja reservas de entradas y butacas, con alta frecuencia de inserciones y cambios.
+\begin{itemize}
+    \item \textbf{PCTFREE}: 20\% -- Espacio libre alto para modificaciones.
+    \item \textbf{PCTUSED}: 60\% -- Bajo umbral de uso para rendimiento eficiente en inserción.
+    \item \textbf{INITRANS}: 5 -- Alto número de transacciones iniciales.
+    \item \textbf{MAXTRANS}: 255
+    \item \textbf{NOCACHE}
+\end{itemize}
+
+\subsection{Menús}
+\textbf{Naturaleza:} Almacena detalles de menús ofrecidos, con pocos cambios esperados.
+\begin{itemize}
+    \item \textbf{PCTFREE}: 5\% -- Menor reserva de espacio.
+    \item \textbf{PCTUSED}: 90\% -- Alto grado de llenado antes de considerar lleno.
+    \item \textbf{INITRANS}: 2 -- Menos transacciones concurrentes.
+    \item \textbf{MAXTRANS}: 100
+    \item \textbf{NOCACHE}
+\end{itemize}
+
+\subsection{Butacas y Reservas}
+\textbf{Naturaleza:} Relaciones N:M entre butacas y reservas, con alta dinámica y necesidad de rápidas reasignaciones.
+\begin{itemize}
+    \item \textbf{PCTFREE}: 20\% -- Mayor espacio libre para ajustes.
+    \item \textbf{PCTUSED}: 50\% -- Umbral bajo para disponibilidad rápida de bloques.
+    \item \textbf{INITRANS}: 6 -- Alta concurrencia requerida.
+    \item \textbf{MAXTRANS}: 255
+    \item \textbf{NOCACHE}
+\end{itemize}
