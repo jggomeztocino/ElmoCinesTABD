@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Verificar la disponibilidad de las butacas seleccionadas
             verificarButacasDisponibles(movie, idSesion, butacasArray)
             .then(disponibles => {
-                console.log(disponibles);
                 if (disponibles) {
                     generarDesplegableMenores(butacasArray.length);
                     generarDesplegablesMenus(butacasArray.length);
@@ -48,15 +47,30 @@ document.addEventListener('DOMContentLoaded', async () => {
                     for(let i = 0; i < butacasArray.length; i++) {
                         // Haya o no menú seleccionado, se añade (0 en el caso que no esté en menusSeleccionados)
                         // Buscar una entrada en el array que sea entradai-... y si no se encuentra, insertar un 0
-                        let temp = menusSeleccionados.find(menu => menu.includes(`entrada${i + 1}`)) || 0; // Si no se encuentra, se inserta un 0
-                        if(temp !== 0)
+                        let temp = menusSeleccionados.find(menu => menu.includes(`entrada${i + 1}`)) || '0'; // Si no se encuentra, se inserta un 0
+                    
+                        if(temp !== '0')
                         {
-                            // Obtener el último carácter de la cadena y convertirlo a número
-                            temp = temp[temp.length - 1];
+                            temp = temp.split('-')[0];
                         }
-                        menus.push(parseInt(temp));
+                        let tempNum = parseInt(temp[temp.length - 1]);
+                        switch(tempNum) {
+                            default:
+                                break;
+                            case 1:
+                                tempNum = 4;
+                                break;
+                            case 2:
+                                tempNum = 3;
+                                break;
+                            case 3:
+                                tempNum = 2;
+                                break;
+                            case 4:
+                                tempNum = 1;                            
+                        }
+                        menus.push(parseInt(tempNum));
                     }
-                    console.log(menus);
 
                     let entradasAdultos = butacasArray.length - document.querySelector('#menoresDesplegable').value;
                     let entradasMenores = parseInt(document.querySelector('#menoresDesplegable').value);
@@ -64,15 +78,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     let entradas = [];
                     // Debemos estructurar las entradas de la siguiente manera:
                     // TipoEntradaArray(TipoEntrada(secuencia_idEntrada.NEXTVAL, 0, 'Entrada adulta', 6), TipoEntrada(secuencia_idEntrada.NEXTVAL, 1, 'Entrada infantil', 4), ...)
-                    for (let i = 0; i < entradasAdultos + entradasMenores; i++) {
-                        for (let j = 0; j < entradasAdultos; j++) {
-                            // id = secuencia_idEntrada.NEXTVAL, idMenu = menus[i], Descripcion = 'Entrada adulta', Precio: 6
-                            entradas.push({idEntrada: 'secuencia_idEntrada.NEXTVAL', idMenu: menus[i], Descripcion: 'Entrada adulta', Precio: 6});
-                        }
-                        for (let j = 0; j < entradasMenores; j++) {
-                            // id = secuencia_idEntrada.NEXTVAL, idMenu = menus[i], Descripcion = 'Entrada infantil', Precio: 4
-                            entradas.push({idEntrada: 'secuencia_idEntrada.NEXTVAL', idMenu: menus[i], Descripcion: 'Entrada infantil', Precio: 4});
-                        }
+                    let i = 0;
+                    for (let j = 0; j < entradasAdultos; j++) {
+                        // id = secuencia_idEntrada.NEXTVAL, idMenu = menus[i], Descripcion = 'Entrada adulta', Precio: 6
+                        entradas.push({idEntrada: 'secuencia_idEntrada.NEXTVAL', idMenu: menus[i], Descripcion: 'Entrada adulta', Precio: 6});
+                        i++;
+                    }
+                    for (let j = 0; j < entradasMenores; j++) {
+                        // id = secuencia_idEntrada.NEXTVAL, idMenu = menus[i], Descripcion = 'Entrada infantil', Precio: 4
+                        entradas.push({idEntrada: 'secuencia_idEntrada.NEXTVAL', idMenu: menus[i], Descripcion: 'Entrada infantil', Precio: 4});
+                        i++;
                     }
                     console.log(entradas);
 

@@ -93,22 +93,46 @@ router.post('/', async (req, res) => {
         // id = secuencia_idEntrada.NEXTVAL, idMenu = menus[i], Descripcion = 'Entrada infantil', Precio: 4
         // Y debemos convertirlo a una Tipo de dato de Oracle con la siguiente estructura:
         // TipoEntradaArray(TipoEntrada(1, 1, 'Entrada adulta', 6), TipoEntrada(2, 1, 'Entrada infantil', 4)) con todas las entradas
-        let EntradasSQL = '';
+        /*et EntradasSQL = '';
         Entradas.forEach((entrada) => {
             EntradasSQL += `TipoEntrada(${entrada.idEntrada}, ${entrada.idMenu}, '${entrada.Descripcion}', ${entrada.Precio}), `;
         });
         // Eliminamos la última coma y espacio y añadimos los paréntesis
-        EntradasSQL = `TipoEntradaArray(${EntradasSQL.slice(0, -2)})`;
+        EntradasSQL = `TipoEntradaArray(${EntradasSQL.slice(0, -2)})`;*/
 
-        // Butacas es un array de números de butacas, como [1, 2, 3, 4, 5]
-        // Y debemos convertirlo a una Tipo de dato de Oracle con la siguiente estructura:
-        // ButacasSeleccionadas(1, 2, 3, 4, 5) con todas las butacas
-        let ButacasSQL = `ButacasSeleccionadas(${Butacas.join(', ')})`;
+        const TipoEntrada = await connection.getDbObjectClass('TIPOENTRADAARRAY');
+        const ButacasSeleccionadas = await connection.getDbObjectClass('BUTACASSELECCIONADAS');
+        
+        let entradaBind = {
+            type: TipoEntrada,
+            val: Entradas.map(entrada => new TipoEntrada({
+                IDENTRADA: 0,
+                IDMENU: entrada.idMenu,
+                DESCRIPCION: entrada.Descripcion,
+                PRECIO: entrada.Precio
+            }))
+        };
+
+        let butacasBind = {
+            type: ButacasSeleccionadas,
+            val: Butacas
+        };
+
+        console.log(idSesion, Sala, Correo, Nombre, Telefono, entradaBind, butacasBind);
 
         await connection.execute(
             `BEGIN ReservasPkg.realizar_reserva(:idSesion, :Sala, :Correo, :Nombre, :Telefono, :Entradas, :Butacas); END;`,
-            { idSesion, Sala, Correo, Nombre, Telefono, EntradasSQL, ButacasSQL }
+            {
+                idSesion,
+                Sala,
+                Correo,
+                Nombre,
+                Telefono,
+                Entradas: entradaBind,
+                Butacas: butacasBind
+            }
         );
+
         res.status(201).send('Reserva realizada');
     } catch (error) {
         console.error(error);

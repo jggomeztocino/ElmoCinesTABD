@@ -250,20 +250,28 @@ CREATE OR REPLACE PACKAGE BODY ReservasPkg AS
         pago VARCHAR2(20) := 'Online';
         fCompra DATE := SYSDATE;
         nuevoIdReserva NUMBER;
+        nuevoIdEntrada NUMBER;
         clienteExistente NUMBER;
     BEGIN
         INSERT INTO Clientes (Correo, Nombre, Telefono) VALUES (email, nom, tfn);
 
         -- Generar el nuevo ID de reserva y realizar la inserción
         SELECT secuencia_idReserva.NEXTVAL INTO nuevoIdReserva FROM dual;
-        INSERT INTO Reservas (idReserva, idSesion, Cliente, FormaPago, FechaCompra, Entradas)
-        VALUES (nuevoIdReserva, sesion, email, pago, fCompra, v_entradas);
+        INSERT INTO Reservas (idReserva, idSesion, Cliente, FormaPago, FechaCompra)
+        VALUES (nuevoIdReserva, sesion, email, pago, fCompra);
+
+        -- Bucle para insertar las entradas y generar ID de entrada
+        FOR i IN 1..v_entradas.COUNT LOOP
+            SELECT secuencia_idEntrada.NEXTVAL INTO nuevoIdEntrada FROM dual;
+            INSERT INTO Entradas (idEntrada, idMenu, Descripcion, Precio, idReserva)
+            VALUES (nuevoIdEntrada, v_entradas(i).IDMENU, v_entradas(i).DESCRIPCION, v_entradas(i).PRECIO, nuevoIdReserva);
+        END LOOP;
 
         -- Bucle para insertar las butacas seleccionadas
         FOR i IN 1..v_butacas.COUNT LOOP
-                INSERT INTO ButacasReservas (idButacaReserva, idButaca, NumeroSala, idReserva)
-                VALUES (secuencia_idButacaReserva.NEXTVAL, v_butacas(i), sala, nuevoIdReserva);
-            END LOOP;
+            INSERT INTO ButacasReservas (idButacaReserva, idButaca, NumeroSala, idReserva)
+            VALUES (secuencia_idButacaReserva.NEXTVAL, v_butacas(i), sala, nuevoIdReserva);
+        END LOOP;
     EXCEPTION
         WHEN OTHERS THEN
             ROLLBACK;
