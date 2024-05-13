@@ -1,0 +1,56 @@
+En este caso, hemos decidido implementar dos tipos de disparadores para servir de apoyo a las funciones cuando estas realicen algún tipo de borrado o se necesite alguna verificación para que no haya cabida a errores.
+
+\section{Disparadores de borrado}
+Son aquellos disparadores que se aseguran de que, tras borrar un elemento de la base de datos, se borren también los elementos asociados.
+
+\subsection{Liberar butacas}
+Este disparador se encargará sencillamente de borrar las butacas que contenían una reserva a eliminar.
+
+\begin{verbatim}
+    CREATE OR REPLACE TRIGGER liberar_butacas
+\end{verbatim}
+
+\subsection{Borrar reservas de clientes}
+Hará una búsqueda de las reservas cuyo correo asociado sea el del cliente que está a punto de ser borrado de la base de datos, para eliminarlas.
+
+\begin{verbatim}
+    CREATE OR REPLACE TRIGGER borrar_reservas_cliente
+\end{verbatim}
+
+\subsection{Borrar reservas de una sesión}
+Se encargará de buscar y eliminar aquellas reservas que se hayan realizado sobre una sesión que esté a punto de ser eliminada.
+
+\begin{verbatim}
+    CREATE OR REPLACE TRIGGER borrar_reservas_sesion
+\end{verbatim}
+
+\subsection{Borrar sesiones}
+Este disparador eliminará las sesiones de una película antes del borrado de esta.
+
+\begin{verbatim}
+    CREATE OR REPLACE TRIGGER borrar_pelicula
+\end{verbatim}
+
+\subsection{Borrar menú}
+Se activará cuando se realice el borrado de un menú en la base de datos. En primer lugar, no se permitirá borrar el menú por defecto (sin menú). Tras esto, seleccionará todas aquellas reservas cuyos menús coincidan con aquel que se va a borrar, y cambiará dichos menús por el menú por defecto.
+
+\begin{verbatim}
+    CREATE OR REPLACE TRIGGER borrar_menu
+\end{verbatim}
+
+\section{Disparadores de verificación}
+Son aquellos disparadores que se aseguran de que la integridad de la base de datos no se vea comprometida a la hora de realizar una inserción/modificación.
+
+\subsection{Verificar menús}
+Comprobará que los menús seleccionados por el usuario siguen existiendo mediante su id.
+
+\begin{verbatim}
+    CREATE OR REPLACE TRIGGER verificar_menu_entrada
+\end{verbatim}
+
+\subsection{Verificar butacas}
+Este disparador se encargará de comprobar que todas las butacas seleccionadas por el usuario siguen disponibles a la hora de realizar la reserva. Si la búsqueda de una reserva con dicha butaca en ella devuelve algún resultado, se lanzará un error borrando también la reserva que se ha estado a punto de realizar.
+
+\begin{verbatim}
+    CREATE OR REPLACE TRIGGER disponibilidad_butacas
+\end{verbatim}

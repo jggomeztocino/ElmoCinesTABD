@@ -1,0 +1,35 @@
+Este proyecto implementa un sistema de gestión para la empresa cinematográfica ficticia \textit{ElmoCines}. Al tratarse de la gestión de un cine, se habilitarán todas aquellas funcionalidades que permitan simular un uso real de una plataforma de estas características.
+
+\section{Requisitos del sistema}
+Antes de comenzar con la creación de la base de datos, debemos plantear cuáles son los requisitos y necesidades que debemos cubrir en un sistema de gestión de cine.
+\subsection{Requisitos funcionales}
+En este apartado, se detallan los requisitos funcionales que guían el diseño y la implementación de la base de datos para describir las funciones y acciones que la base de datos debe ser capaz de llevar a cabo para satisfacer las necesidades del sistema y de los usuarios:
+
+\begin{itemize}
+    \item \textbf{Gestión de clientes:} La base de datos debe ser capaz de soportar operaciones de inserción, recuperación, actualización y borrado (CRUD) sobre los datos de los clientes por el administrador del sitio web. También existirá la función que nos devuelva la película más exitosa.
+
+    \item \textbf{Gestión de películas:} Se deberán poder mostrar todas las películas disponibles en cartelera al usuario, así como los detalles individuales de cada una de ellas al hacer click en su carátula.
+
+    Además, deberán existir funciones que nos permitan eliminar todas las películas, eliminarlas individualmente por su ``id'' e insertarlas.
+
+    \item \textbf{Gestión de reservas:} Se podrán realizar inserciones y borrados de reservas, además de calcular el importe total antes de su realización. Adicionalmente, existirá la posibilidad de obtener el menú más pedido por los clientes.
+
+    \item \textbf{Gestión de sesiones:} Las sesiones podrán ser eliminadas por su id, por el ID de una película (borrando todas las sesiones asociadas a esta) o en su totalidad.
+
+    Por otro lado, se podrá calcular el número de butacas libres de una sesión en específico, listar aquellas con butacas libres y listar los detalles.
+
+    También se podrá buscar una sesión por película, fecha y hora.
+\end{itemize}
+
+\subsection{Requisitos no funcionales}
+Los requisitos no funcionales definen atributos de calidad que la base de datos debe cumplir para satisfacer las necesidades de los usuarios y garantizar su eficacia y eficiencia:
+
+\begin{itemize}
+    \item \textbf{Seguridad:} Los usuarios no serán capaces de acceder a la gestión de los propios usuarios. De este modo, no se podrán realizar operaciones CRUD no deseadas sobre la base de datos.
+
+    \item \textbf{Mantenibilidad:} La base de datos debe ser fácil de mantener y administrar, existiendo una documentación clara de los procedimientos y las tareas necesarias para llevar a cabo dicho mantenimiento.
+
+    \item \textbf{Fiabilidad:} La base de datos será confiable y consistente, por lo que los datos se almacenarán y se recuperarán de forma precisa y sin dar lugar a errores, ya que todos estos estarán debidamente controlados con mecanismos implementados por el desarrollador. Por ello, se garantiza la integridad de los datos y la estabilidad del sistema.
+
+    \item \textbf{Rendimiento:} Se deben procesar consultas de la manera más eficiente posible para así obtener unos tiempos de respuesta óptimos. De esta forma, se maximizará el rendimiento del sistema.
+\end{itemize}
