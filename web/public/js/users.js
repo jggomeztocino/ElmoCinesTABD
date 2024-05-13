@@ -143,7 +143,7 @@ document.addEventListener("DOMContentLoaded", function() {
             });
             if (!response.ok) throw new Error('Error al actualizar el usuario');
             alert('Usuario actualizado correctamente');
-            await getAllUsers();  // Asegurarse de que la vista se actualice con los nuevos datos
+            await getAllUsers();
         } catch (error) {
             console.error('updateUser:', error.message);
             alert('Error al actualizar el usuario: ' + error.message);

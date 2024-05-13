@@ -147,11 +147,10 @@ router.get('/', async (req, res) => {
         const resultSet = result.outBinds.cursor;
         const rows = await resultSet.getRows(); // Fetch all rows
 
-        // Transform the rows into objects with specific properties
         const clients = rows.map((row) => ({
-            Nombre: row[1],  // Assuming 'Nombre' is the second column in your row
-            Correo: row[0],  // Assuming 'Correo' is the first column
-            Telefono: row[2] // Assuming 'Telefono' is the third column
+            Nombre: row[1], 
+            Correo: row[0],
+            Telefono: row[2]
         }));
 
         await resultSet.close();
@@ -255,7 +254,6 @@ router.put('/:id', async (req, res) => {
         const result = await connection.execute(sql, binds, { autoCommit: true });
 
         // Oracle no actualiza rowsAffected en las llamadas a procedimientos, por eso no podemos usarlo para verificar
-        // Si necesitas verificar si el usuario fue realmente actualizado, necesitas otro método, posiblemente una consulta adicional o una salida del procedimiento
         res.send('User updated successfully');
         
     } catch (error) {
