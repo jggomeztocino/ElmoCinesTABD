@@ -90,6 +90,13 @@ router.get('/:movieId', async (req, res) => {
                 }
             }
 
+            // Ordenar butacas por asiento (A1, A2, ..., F5)
+            sessionDetail.butacas_detalles.sort((a, b) => {
+                if (a.numero < b.numero) return -1;
+                if (a.numero > b.numero) return 1;
+                return 0;
+            });
+
             sessions.push(sessionDetail);
         }
 

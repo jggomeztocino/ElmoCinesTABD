@@ -81,12 +81,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     let i = 0;
                     for (let j = 0; j < entradasAdultos; j++) {
                         // id = secuencia_idEntrada.NEXTVAL, idMenu = menus[i], Descripcion = 'Entrada adulta', Precio: 6
-                        entradas.push({idEntrada: 'secuencia_idEntrada.NEXTVAL', idMenu: menus[i], Descripcion: 'Entrada adulta', Precio: 6});
+                        entradas.push({idEntrada: 0, idMenu: menus[i], Descripcion: 'Entrada adulta', Precio: 6});
                         i++;
                     }
                     for (let j = 0; j < entradasMenores; j++) {
                         // id = secuencia_idEntrada.NEXTVAL, idMenu = menus[i], Descripcion = 'Entrada infantil', Precio: 4
-                        entradas.push({idEntrada: 'secuencia_idEntrada.NEXTVAL', idMenu: menus[i], Descripcion: 'Entrada infantil', Precio: 4});
+                        entradas.push({idEntrada: 0, idMenu: menus[i], Descripcion: 'Entrada infantil', Precio: 4});
                         i++;
                     }
                     console.log(entradas);
@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                             )
                                         }
                                     )
-                                });
+                                }).then(() => window.location.href = 'thankyou.html');
                             } 
                             else 
                             {

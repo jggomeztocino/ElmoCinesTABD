@@ -100,23 +100,33 @@ router.post('/', async (req, res) => {
         // Eliminamos la última coma y espacio y añadimos los paréntesis
         EntradasSQL = `TipoEntradaArray(${EntradasSQL.slice(0, -2)})`;*/
 
-        const TipoEntrada = await connection.getDbObjectClass('TIPOENTRADAARRAY');
         const ButacasSeleccionadas = await connection.getDbObjectClass('BUTACASSELECCIONADAS');
-        
-        let entradaBind = {
-            type: TipoEntrada,
-            val: Entradas.map(entrada => new TipoEntrada({
-                IDENTRADA: 0,
-                IDMENU: entrada.idMenu,
-                DESCRIPCION: entrada.Descripcion,
-                PRECIO: entrada.Precio
-            }))
-        };
 
         let butacasBind = {
             type: ButacasSeleccionadas,
             val: Butacas
         };
+
+        const TipoEntrada = await connection.getDbObjectClass('TIPOENTRADA');
+        const TipoEntradaArray = await connection.getDbObjectClass('TIPOENTRADAARRAY');
+
+        let entradasArray = new TipoEntradaArray(); // Crear una instancia del VARRAY
+        Entradas.forEach(entrada => {
+            // Crea una nueva instancia de TipoEntrada
+            let tempEntrada = new TipoEntrada({
+                IDMENU: entrada.idMenu,
+                DESCRIPCION: entrada.Descripcion,
+                PRECIO: entrada.Precio
+            });
+            entradasArray.append(tempEntrada); // Usar append para añadir al VARRAY
+        });
+
+
+        let entradaBind = {
+            type: TipoEntradaArray, // Usar el tipo correcto para el bind
+            val: entradasArray
+        };
+
 
         console.log(idSesion, Sala, Correo, Nombre, Telefono, entradaBind, butacasBind);
 
@@ -128,10 +138,10 @@ router.post('/', async (req, res) => {
                 Correo,
                 Nombre,
                 Telefono,
-                Entradas: entradaBind,
-                Butacas: butacasBind
+                Entradas: { type: TipoEntradaArray, val: entradasArray },
+                Butacas: { type: ButacasSeleccionadas, val: Butacas }
             }
-        );
+        );        
 
         res.status(201).send('Reserva realizada');
     } catch (error) {

@@ -221,6 +221,7 @@ router.post('/', async (req, res) => {
             phone: newUser.phone
         });
         await connection.commit();
+        sendEmail(newUser.email, '¡Bienvenido a ElmoCines!', enviarBienvenidaHTML(newUser));
         res.status(201).send('User added successfully');
     } catch (error) {
         res.status(500).send('Error adding user: ' + error.message);
